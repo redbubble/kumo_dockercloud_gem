@@ -4,3 +4,4 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'kumo_ki', git: 'git@github.com:redbubble/kumo_ki_gem.git'
+gem 'tutum'
