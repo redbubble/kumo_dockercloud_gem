@@ -3,6 +3,7 @@
 set -e
 
 echo "--- :clock1: :clock2: running specs :clock3: :clock4:"
+bundle install
 bundle exec rspec
 
 function inline_image {
