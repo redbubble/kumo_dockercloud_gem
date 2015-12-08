@@ -5,7 +5,7 @@ module KumoTutum
   class EnvironmentConfig
     LOGGER = Logger.new(STDOUT)
 
-    APP_NAME = 'asset-wala'
+    APP_NAME = 'asset-wala' #TODO: Don't hardcode the app name
 
     attr_reader :env_name
 

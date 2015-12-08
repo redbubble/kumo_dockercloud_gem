@@ -2,28 +2,31 @@ require 'kumo_tutum/environment'
 require 'kumo_tutum/environment_config'
 
 describe KumoTutum::Environment do
-  subject(:env) { described_class.new(name: 'rspec', env_vars: { 'KEY' => 'VALUE' }, config_path: 'a path') }
+  subject(:env) { described_class.new(name: 'test', env_vars: { 'KEY' => 'VALUE' }, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
+  let(:config) { KumoTutum::EnvironmentConfig.new(env_name: 'test', config_path: 'a path') }
 
-  describe '#get_stack_file_data' do
-    subject { env.get_stack_file_data(stack_template) }
-
-    let(:config) { KumoTutum::EnvironmentConfig.new(env_name: 'rspec', config_path: 'a path') }
-    let(:plain_text_secrets) do
-      {
+  let(:plain_text_secrets) do
+    {
         'TEST_ENV' => 'FAKE',
         'MORE'     => 'ANOTHER'
-      }
-    end
+    }
+  end
+
+  before do
+    allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
+    allow(config).to receive(:plain_text_secrets).and_return(plain_text_secrets)
+
+  end
+
+  describe '#configure_stack' do
+    subject { env.configure_stack(stack_template) }
+
+
     let(:stack_template) do
       <<-eos
           asset-wala:
             image: a-thing
       eos
-    end
-
-    before do
-      allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
-      allow(config).to receive(:plain_text_secrets).and_return(plain_text_secrets)
     end
 
     it 'creates an EnvironmentConfig' do
@@ -82,5 +85,29 @@ describe KumoTutum::Environment do
                               })
       end
     end
+  end
+
+  describe "#apply" do
+    subject { env.apply }
+    let(:stack_file_data_yaml) { double("stack_file_data_yaml") }
+
+    before do
+      allow(config).to receive(:image_tag).and_return('latest')
+      allow(env).to receive(:evaluate_command).and_return 'asset-wala'
+      allow(env).to receive(:run_command)
+      tutum_api = double("TutumApi", stack_by_name: {'sldkfj': 'adofiu'})
+      allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
+      allow_any_instance_of(KumoTutum::StateValidator).to receive(:wait_for_state)
+    end
+
+    it "writes a stack file" do
+      expect_any_instance_of(Tempfile).to receive(:write).with("---\nasset-wala:\n  image: a-thing\n  environment:\n    TEST_ENV: FAKE\n    MORE: ANOTHER\n    KEY: VALUE\n")
+      subject
+    end
+
+    it 'runs the stack command'
+    it 'deletes the tempfile?'
+    it 'runs the tutum redeploy command'
+    it "makes sure it waits until it's running"
   end
 end
