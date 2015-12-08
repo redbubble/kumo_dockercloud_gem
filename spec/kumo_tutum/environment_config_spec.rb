@@ -1,6 +1,5 @@
 require 'kumo_tutum/environment_config'
 require 'kumo_tutum/tutum_api'
-require 'yaml'
 
 describe KumoTutum::EnvironmentConfig do
   let(:env_name) { 'test' }

@@ -111,7 +111,6 @@ module KumoTutum
     end
 
     def encrypted_secrets
-      puts encrypted_secrets_path
       file               = File.read(encrypted_secrets_path)
       erb_result = ERB.new(file).result(get_binding)
       @encrypted_secrets ||= YAML.load(erb_result)

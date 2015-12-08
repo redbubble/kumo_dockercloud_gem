@@ -3,7 +3,7 @@ require 'erb'
 require 'tempfile'
 require 'forwardable'
 
-# require_relative 'api'
+require_relative 'tutum_api'
 # require_relative 'state_validator'
 require_relative 'environment_config'
 
@@ -16,7 +16,8 @@ module KumoTutum
     def initialize(params = {})
       @env_name = params.fetch(:name)
       @env_vars = params.fetch(:env_vars, {})
-      @config   = EnvironmentConfig.new(env_name: @env_name)
+
+      @config   = EnvironmentConfig.new(env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
     def apply
