@@ -117,19 +117,26 @@ application-stack-name:
 
     it "writes a stack file" do
       expect_any_instance_of(Tempfile).to receive(:write).with(configured_stack_file)
+
       subject
     end
 
     it 'runs the stack command' do
       expect(env).to receive(:run_command).with(%r{^tutum stack create -f .* -n #{full_stack_name}$})
+
       subject
     end
 
     it 'runs the tutum redeploy command' do
       expect(env).to receive(:run_command).with("tutum stack redeploy #{full_stack_name}")
+
       subject
     end
 
-    it "makes sure it waits until it's running"
+    it "makes sure it waits until it's running" do
+      expect(KumoTutum::StateValidator).to receive(:new).exactly(3).times.and_return(double(KumoTutum::StateValidator, wait_for_state: nil))
+
+      subject
+    end
   end
 end
