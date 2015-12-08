@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Use to create Redbubble environments on the Tutum platform}
   spec.description   = %q{Use to create Redbubble environments on the Tutum platform}
   spec.homepage      = ''
-  spec.license       = 'Nonstandard'
+  spec.license       = 'mit'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
