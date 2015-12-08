@@ -104,11 +104,13 @@ application-stack-name:
       YAML
     }
 
+    let(:full_stack_name) { "#{app_name}-test" }
+
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
-      tutum_api = double("TutumApi", stack_by_name: {"#{app_name}-test": 'stack stuff'})
+      tutum_api = double("TutumApi", stack_by_name: {"#{full_stack_name}": 'stack stuff'})
       allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
       allow_any_instance_of(KumoTutum::StateValidator).to receive(:wait_for_state)
     end
@@ -119,12 +121,12 @@ application-stack-name:
     end
 
     it 'runs the stack command' do
-      expect(env).to receive(:run_command).with(/^tutum stack create -f .* -n application-stack-name-test$/)
+      expect(env).to receive(:run_command).with(%r{^tutum stack create -f .* -n #{full_stack_name}$})
       subject
     end
 
     it 'runs the tutum redeploy command' do
-      expect(env).to receive(:run_command).with("tutum stack redeploy application-stack-name-test")
+      expect(env).to receive(:run_command).with("tutum stack redeploy #{full_stack_name}")
       subject
     end
 
