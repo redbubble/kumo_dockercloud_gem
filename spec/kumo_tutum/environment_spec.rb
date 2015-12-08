@@ -2,13 +2,14 @@ require 'kumo_tutum/environment'
 require 'kumo_tutum/environment_config'
 
 describe KumoTutum::Environment do
-  subject(:env) { described_class.new(name: 'test', env_vars: { 'KEY' => 'VALUE' }, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
-  let(:config) { KumoTutum::EnvironmentConfig.new(app_name: 'application-stack-name', env_name: 'test', config_path: 'a path') }
+  subject(:env) { described_class.new(name: 'test', env_vars: {'KEY' => 'VALUE'}, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
+  let(:app_name) { 'application-stack-name' }
+  let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
 
   let(:plain_text_secrets) do
     {
         'TEST_ENV' => 'FAKE',
-        'MORE'     => 'ANOTHER'
+        'MORE' => 'ANOTHER'
     }
   end
 
@@ -35,14 +36,14 @@ describe KumoTutum::Environment do
     end
 
     it 'adds environment variables to stack config' do
-      expect(subject).to eq('application-stack-name' => {
-                              'image'       => 'a-thing',
-                              'environment' => {
-                                'TEST_ENV' => 'FAKE',
-                                'MORE'     => 'ANOTHER',
-                                'KEY'      => 'VALUE'
-                              }
-                            })
+      expect(subject).to eq(app_name => {
+          'image' => 'a-thing',
+          'environment' => {
+              'TEST_ENV' => 'FAKE',
+              'MORE' => 'ANOTHER',
+              'KEY' => 'VALUE'
+          }
+      })
     end
 
     context 'with some existing environment' do
@@ -55,15 +56,15 @@ describe KumoTutum::Environment do
         eos
       end
       it 'should add new secrets to the environment' do
-        expect(subject).to eq('application-stack-name' => {
-                                'image'       => 'a-thing',
-                                'environment' => {
-                                  'TEST'     => 'thing',
-                                  'TEST_ENV' => 'FAKE',
-                                  'MORE'     => 'ANOTHER',
-                                  'KEY'      => 'VALUE'
-                                }
-                              })
+        expect(subject).to eq(app_name => {
+            'image' => 'a-thing',
+            'environment' => {
+                'TEST' => 'thing',
+                'TEST_ENV' => 'FAKE',
+                'MORE' => 'ANOTHER',
+                'KEY' => 'VALUE'
+            }
+        })
       end
     end
 
@@ -75,14 +76,14 @@ describe KumoTutum::Environment do
         eos
       end
       it 'should create the environment with secrets in it' do
-        expect(subject).to eq('application-stack-name' => {
-                                'image'       => 'a-thing',
-                                'environment' => {
-                                  'TEST_ENV' => 'FAKE',
-                                  'MORE'     => 'ANOTHER',
-                                  'KEY'      => 'VALUE'
-                                }
-                              })
+        expect(subject).to eq(app_name => {
+            'image' => 'a-thing',
+            'environment' => {
+                'TEST_ENV' => 'FAKE',
+                'MORE' => 'ANOTHER',
+                'KEY' => 'VALUE'
+            }
+        })
       end
     end
   end
@@ -100,12 +101,12 @@ application-stack-name:
     TEST_ENV: FAKE
     MORE: ANOTHER
     KEY: VALUE
-YAML
+      YAML
     }
 
     before do
       allow(config).to receive(:image_tag).and_return('latest')
-      allow(env).to receive(:evaluate_command).and_return 'application-stack-name'
+      allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
       tutum_api = double("TutumApi", stack_by_name: {'sldkfj': 'adofiu'})
       allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
