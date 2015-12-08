@@ -6,13 +6,13 @@ describe KumoTutum::TutumApi do
     subject { described_class.new(options) }
     let(:tutum_user_env) { 'nada user' }
     let(:tutum_apikey_env) { 'nada key' }
-    let(:dot_tutum_data) {
+    let(:dot_tutum_data) do
       <<-eos
         [auth]
         user = wilma
         apikey = letmein
       eos
-    }
+    end
     let(:dot_tutum_io_object) { StringIO.new(dot_tutum_data) }
 
     before do
@@ -23,7 +23,7 @@ describe KumoTutum::TutumApi do
 
     context 'appropriately fills default credentials' do
       context 'tutum_auth in options' do
-        let(:options) { {tutum_auth: 'fred'} }
+        let(:options) { { tutum_auth: 'fred' } }
         it 'overrides nothing' do
           expect(subject.username).to be_nil
           expect(subject.api_key).to be_nil
@@ -33,7 +33,7 @@ describe KumoTutum::TutumApi do
 
       context 'tutum_auth not given' do
         context 'pass in username/api_key options' do
-          let(:options) { {username: 'fred', api_key: 'barney'} }
+          let(:options) { { username: 'fred', api_key: 'barney' } }
 
           it 'uses options passed in' do
             expect(subject.username).to eq('fred')
@@ -43,7 +43,7 @@ describe KumoTutum::TutumApi do
 
         context 'with env variables set' do
           let(:options) { {} }
-          it "sets username/password from env vars" do
+          it 'sets username/password from env vars' do
             expect(subject.username).to eq('nada user')
             expect(subject.api_key).to eq('nada key')
           end
@@ -63,14 +63,14 @@ describe KumoTutum::TutumApi do
     end
   end
 
-  context "with API creds mocked" do
+  context 'with API creds mocked' do
     subject(:api) { KumoTutum::TutumApi.new }
 
     before do
       allow_any_instance_of(KumoTutum::TutumApi).to receive(:tutum_config).and_return({})
     end
 
-    describe "#tutum_config_file" do
+    describe '#tutum_config_file' do
       context do
         subject { api.send(:tutum_config_file) }
 
@@ -85,7 +85,7 @@ describe KumoTutum::TutumApi do
 
     describe '#stack_by_name' do
       subject { api.stack_by_name(stack_name) }
-      let(:stacks_mock) { double('Tutum::TutumStacks', :list => stack_hash_data) }
+      let(:stacks_mock) { double('Tutum::TutumStacks', list: stack_hash_data) }
 
       before do
         allow(api).to receive(:stacks).and_return(stacks_mock)
@@ -93,44 +93,52 @@ describe KumoTutum::TutumApi do
 
       context 'when you have 1 stack, with matching name' do
         let(:stack_name) { 'my thing' }
-        let(:stack_hash_data) { {
-          'objects' => [
-            {'name' => 'my thing'},
-          ]
-        } }
+        let(:stack_hash_data) do
+          {
+            'objects' => [
+              { 'name' => 'my thing' }
+            ]
+          }
+        end
         it 'returns the correct stack' do
           expect(subject['name']).to eq('my thing')
         end
       end
       context 'when you have 1 stack, with non-matching name' do
         let(:stack_name) { 'my thing' }
-        let(:stack_hash_data) { {
-          'objects' => [
-            {'name' => 'my bad thing'},
-          ]
-        } }
+        let(:stack_hash_data) do
+          {
+            'objects' => [
+              { 'name' => 'my bad thing' }
+            ]
+          }
+        end
         it do
           expect(subject).to be_nil
         end
       end
       context 'when your stacks have /matching/ but non-equal names' do
         let(:stack_name) { 'some name' }
-        let(:stack_hash_data) { {
-          'objects' => [
-            {'name' => 'not some name'},
-            {'name' => 'some name'},
-            {'name' => 'some name bad'},
-          ]
-        } }
+        let(:stack_hash_data) do
+          {
+            'objects' => [
+              { 'name' => 'not some name' },
+              { 'name' => 'some name' },
+              { 'name' => 'some name bad' }
+            ]
+          }
+        end
         it 'returns the correct stack' do
           expect(subject['name']).to eq('some name')
         end
       end
       context 'when you have no stacks' do
         let(:stack_name) { 'some name' }
-        let(:stack_hash_data) { {
-          'objects' => []
-        } }
+        let(:stack_hash_data) do
+          {
+            'objects' => []
+          }
+        end
         it do
           expect(subject).to be_nil
         end
@@ -142,9 +150,9 @@ describe KumoTutum::TutumApi do
 
       let(:stack_name) { 'my stack' }
 
-      context "when the stack exists" do
+      context 'when the stack exists' do
         before do
-          allow(api).to receive(:stack_by_name).and_return({'services' => services_list})
+          allow(api).to receive(:stack_by_name).and_return('services' => services_list)
         end
 
         context 'without any services' do
@@ -154,16 +162,18 @@ describe KumoTutum::TutumApi do
             subject
           end
 
-          it "returns a blank list" do
+          it 'returns a blank list' do
             expect(subject).to eq []
           end
         end
 
         context 'with services' do
-          let(:services_list) { [
-            '/api/v1/services/my-thing',
-            '/api/v1/services/the-other',
-          ] }
+          let(:services_list) do
+            [
+              '/api/v1/services/my-thing',
+              '/api/v1/services/the-other'
+            ]
+          end
           let(:services_mock) { double('Tutum::TutumServices') }
           let(:stack_name) { 'other stack' }
 
@@ -181,7 +191,7 @@ describe KumoTutum::TutumApi do
             expect(services_mock).to receive(:get).with('the-other')
             subject
           end
-          it "returns list of service data" do
+          it 'returns list of service data' do
             expect(subject).to eq [:my_thing_test, :the_other_test]
           end
           it 'appropriately passes through the correct stack name' do
@@ -193,20 +203,18 @@ describe KumoTutum::TutumApi do
 
       context "when the stack doesn't exist" do
         let(:stack_list_json) do
-          JSON.dump({
-                      'objects' => [
-                        {'name' => 'other'},
-                        {'name' => 'bad'},
-                      ]
-                    })
+          JSON.dump('objects' => [
+            { 'name' => 'other' },
+            { 'name' => 'bad' }
+          ])
         end
 
         before do
-          stub_request(:get, "https://dashboard.tutum.co/api/v1/stack/").
-            to_return(:status => 200, :body => stack_list_json)
+          stub_request(:get, 'https://dashboard.tutum.co/api/v1/stack/')
+            .to_return(status: 200, body: stack_list_json)
         end
 
-        it "returns a blank list" do
+        it 'returns a blank list' do
           expect(subject).to eq []
         end
       end
@@ -223,7 +231,7 @@ describe KumoTutum::TutumApi do
       end
 
       context 'with only 1 service' do
-        let(:services_list) { [{'containers' => containers_list}] }
+        let(:services_list) { [{ 'containers' => containers_list }] }
 
         context 'without any containers' do
           let(:containers_list) { [] }
@@ -232,16 +240,18 @@ describe KumoTutum::TutumApi do
             subject
           end
 
-          it "returns a blank list" do
+          it 'returns a blank list' do
             expect(subject).to eq []
           end
         end
 
         context 'with containers' do
-          let(:containers_list) { [
-            '/api/v1/containers/my-thing',
-            '/api/v1/containers/the-other',
-          ] }
+          let(:containers_list) do
+            [
+              '/api/v1/containers/my-thing',
+              '/api/v1/containers/the-other'
+            ]
+          end
 
           before do
             allow(api).to receive(:containers).and_return(containers_mock)
@@ -257,16 +267,18 @@ describe KumoTutum::TutumApi do
             expect(containers_mock).to receive(:get).with('the-other')
             subject
           end
-          it "returns list of container data" do
+          it 'returns list of container data' do
             expect(subject).to eq [:my_thing_test, :the_other_test]
           end
         end
       end
       context 'with multiple services' do
-        let(:services_list) { [
-          {'containers' => ['/api/v1/containers/a', '/api/v1/containers/c']},
-          {'containers' => ['/api/v1/containers/d', '/api/v1/containers/b']},
-        ] }
+        let(:services_list) do
+          [
+            { 'containers' => ['/api/v1/containers/a', '/api/v1/containers/c'] },
+            { 'containers' => ['/api/v1/containers/d', '/api/v1/containers/b'] }
+          ]
+        end
         let(:stack_name) { 'other stack' }
 
         before do
@@ -293,10 +305,12 @@ describe KumoTutum::TutumApi do
 
       let(:stack_name) { 'other stack' }
       let(:nodes_mock) { double('Tutum::TutumNodes') }
-      let(:containers_list) { [
-        {'node' => '/api/v1/nodes/my-thing'},
-        {'node' => '/api/v1/nodes/the-other'},
-      ] }
+      let(:containers_list) do
+        [
+          { 'node' => '/api/v1/nodes/my-thing' },
+          { 'node' => '/api/v1/nodes/the-other' }
+        ]
+      end
 
       before do
         allow(api).to receive(:containers_by_stack_name).and_return(containers_list)
@@ -316,7 +330,7 @@ describe KumoTutum::TutumApi do
         expect(nodes_mock).to receive(:get).with('the-other')
         subject
       end
-      it "returns list of nodes data" do
+      it 'returns list of nodes data' do
         expect(subject).to eq [:my_thing_test, :the_other_test]
       end
       it 'appropriately passes through the correct stack name' do

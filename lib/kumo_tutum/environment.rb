@@ -9,7 +9,6 @@ require_relative 'environment_config'
 
 module KumoTutum
   class Environment
-
     extend ::Forwardable
     def_delegators :@config, :stack_name, :env_name
 
@@ -66,7 +65,7 @@ module KumoTutum
       lambda {
         services = tutum_api.services_by_stack_name(stack_name)
         services.select! { |service| service['name'] != 'geckoboardwidget' }
-        {'name' => 'services', 'state' => services.map { |s| s['state'] }.uniq.join}
+        { 'name' => 'services', 'state' => services.map { |s| s['state'] }.uniq.join }
       }
     end
 
@@ -99,7 +98,5 @@ module KumoTutum
       stack_template_filepath = File.expand_path(File.join('..', '..', '..', 'tutum', 'stack.yml.erb'), __FILE__)
       File.read(stack_template_filepath)
     end
-
-
   end
 end

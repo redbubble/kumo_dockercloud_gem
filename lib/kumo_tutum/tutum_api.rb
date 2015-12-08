@@ -1,7 +1,6 @@
 require 'tutum'
 
 module KumoTutum
-
   def self.uuid_from_uri(uri)
     uri.split('/')[-1]
   end
@@ -11,14 +10,14 @@ module KumoTutum
     def initialize(options = {})
       if options[:tutum_auth].nil?
         options[:username] ||= ENV['TUTUM_USER'] || read_user_id
-        options[:api_key]  ||= ENV['TUTUM_APIKEY'] || read_api_key
+        options[:api_key] ||= ENV['TUTUM_APIKEY'] || read_api_key
       end
 
       super options
     end
 
     def stack_by_name(name)
-      stacks.list['objects'].select { |s| s['name'].eql? name }.first
+      stacks.list['objects'].find { |s| s['name'].eql? name }
     end
 
     def services_by_stack_name(stack_name)
@@ -64,16 +63,13 @@ module KumoTutum
         handle = tutum_config_file
         handle.each_line do |line|
           parts = line.split('=', 2)
-          if parts.length == 2 # ignore ini headers
-            @config_data[parts[0].strip] = parts[1].strip
-          end
+          @config_data[parts[0].strip] = parts[1].strip if parts.length == 2 # ignore ini headers
         end
 
         handle.close
       end
 
-      return @config_data
+      @config_data
     end
-
   end
 end

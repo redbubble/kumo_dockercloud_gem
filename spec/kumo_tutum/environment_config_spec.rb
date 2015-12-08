@@ -3,20 +3,19 @@ require 'kumo_tutum/tutum_api'
 
 describe KumoTutum::EnvironmentConfig do
   let(:env_name) { 'test' }
-  let(:config_path) { File.join(__dir__, '../fixtures/config')  }
+  let(:config_path) { File.join(__dir__, '../fixtures/config') }
   subject(:instance) { described_class.new(env_name: env_name, config_path: config_path) }
 
   let(:tutum_api) { instance_double('KumoTutum::TutumApi') }
 
   describe '#get_binding' do
-    let(:services_for_stack) { Array.new }
+    let(:services_for_stack) { [] }
 
     # Ruby binding can only be tested by
     # evaluating strings against the binding
     subject { eval(string, instance.get_binding) }
 
     describe '@env_name' do
-
       let(:string) { '@env_name' }
 
       it 'is taken from the given parameter' do
@@ -26,10 +25,12 @@ describe KumoTutum::EnvironmentConfig do
 
     describe '#plain_text_secrets' do
       context 'with no encrypted secrets' do
-        let(:secrets_data) { {
-          'testkey'  => 'someval',
-          'moretest' => 'otherval',
-        } }
+        let(:secrets_data) do
+          {
+            'testkey'  => 'someval',
+            'moretest' => 'otherval'
+          }
+        end
 
         let(:string) { 'plain_text_secrets' }
 
@@ -44,10 +45,12 @@ describe KumoTutum::EnvironmentConfig do
 
         let(:kms) { double('KumoKi::KMS') }
 
-        let(:plain_data) { {
-          'testkey' => 'someval',
-          'enctest' => plain_value,
-        } }
+        let(:plain_data) do
+          {
+            'testkey' => 'someval',
+            'enctest' => plain_value
+          }
+        end
 
         let(:string) { 'plain_text_secrets' }
 
@@ -69,13 +72,11 @@ describe KumoTutum::EnvironmentConfig do
       end
 
       describe '#image_name' do
-
         let(:string) { 'image_name' }
 
         context 'when there is a tutum service for the given stack' do
-
           let(:image_name) { 'redbubble/asset-wala:1234' }
-          let(:services_for_stack) { [{'image_name' => image_name}] }
+          let(:services_for_stack) { [{ 'image_name' => image_name }] }
 
           it 'uses the pre-exisiting image name' do
             expect(subject).to eq image_name
@@ -83,15 +84,14 @@ describe KumoTutum::EnvironmentConfig do
         end
 
         context 'when there is no tutum service for the given stack' do
-
-          let(:services_for_stack) { Array.new }
+          let(:services_for_stack) { [] }
 
           it { expect(subject).to eq 'redbubble/asset-wala:latest' }
         end
       end
 
       describe '#image_tag' do
-        let(:services_for_stack) { [{'image_name' => image_name}] }
+        let(:services_for_stack) { [{ 'image_name' => image_name }] }
 
         subject { instance.image_tag }
 
@@ -107,4 +107,3 @@ describe KumoTutum::EnvironmentConfig do
     end
   end
 end
-
