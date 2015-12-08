@@ -33,7 +33,7 @@ module KumoTutum
     private
 
     def tutum_api
-      @tutum_api ||= KumoTutum::Api.new
+      @tutum_api ||= KumoTutum::TutumApi.new
     end
 
     def current_state
