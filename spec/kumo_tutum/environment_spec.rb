@@ -24,7 +24,7 @@ describe KumoTutum::Environment do
 
     let(:stack_template) do
       <<-eos
-          asset-wala:
+          application-stack-name:
             image: a-thing
       eos
     end
@@ -35,7 +35,7 @@ describe KumoTutum::Environment do
     end
 
     it 'adds environment variables to stack config' do
-      expect(subject).to eq('asset-wala' => {
+      expect(subject).to eq('application-stack-name' => {
                               'image'       => 'a-thing',
                               'environment' => {
                                 'TEST_ENV' => 'FAKE',
@@ -48,14 +48,14 @@ describe KumoTutum::Environment do
     context 'with some existing environment' do
       let(:stack_template) do
         <<-eos
-          asset-wala:
+          application-stack-name:
             image: a-thing
             environment:
               TEST: thing
         eos
       end
       it 'should add new secrets to the environment' do
-        expect(subject).to eq('asset-wala' => {
+        expect(subject).to eq('application-stack-name' => {
                                 'image'       => 'a-thing',
                                 'environment' => {
                                   'TEST'     => 'thing',
@@ -70,12 +70,12 @@ describe KumoTutum::Environment do
     context 'without any existing environment' do
       let(:stack_template) do
         <<-eos
-          asset-wala:
+          application-stack-name:
             image: a-thing
         eos
       end
       it 'should create the environment with secrets in it' do
-        expect(subject).to eq('asset-wala' => {
+        expect(subject).to eq('application-stack-name' => {
                                 'image'       => 'a-thing',
                                 'environment' => {
                                   'TEST_ENV' => 'FAKE',
@@ -94,7 +94,7 @@ describe KumoTutum::Environment do
     let(:configured_stack_file) {
       <<-YAML
 ---
-asset-wala:
+application-stack-name:
   image: a-thing
   environment:
     TEST_ENV: FAKE
@@ -105,7 +105,7 @@ YAML
 
     before do
       allow(config).to receive(:image_tag).and_return('latest')
-      allow(env).to receive(:evaluate_command).and_return 'asset-wala'
+      allow(env).to receive(:evaluate_command).and_return 'application-stack-name'
       allow(env).to receive(:run_command)
       tutum_api = double("TutumApi", stack_by_name: {'sldkfj': 'adofiu'})
       allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api

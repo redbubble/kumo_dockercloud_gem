@@ -68,14 +68,14 @@ describe KumoTutum::EnvironmentConfig do
     context 'with Tutum API mocked' do
       before do
         allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
-        allow(tutum_api).to receive(:services_by_stack_name).with("asset-wala-#{env_name}").and_return(services_for_stack)
+        allow(tutum_api).to receive(:services_by_stack_name).with("application-stack-name-#{env_name}").and_return(services_for_stack)
       end
 
       describe '#image_name' do
         let(:string) { 'image_name' }
 
         context 'when there is a tutum service for the given stack' do
-          let(:image_name) { 'redbubble/asset-wala:1234' }
+          let(:image_name) { 'redbubble/application-stack-name:1234' }
           let(:services_for_stack) { [{ 'image_name' => image_name }] }
 
           it 'uses the pre-exisiting image name' do
@@ -86,7 +86,7 @@ describe KumoTutum::EnvironmentConfig do
         context 'when there is no tutum service for the given stack' do
           let(:services_for_stack) { [] }
 
-          it { expect(subject).to eq 'redbubble/asset-wala:latest' }
+          it { expect(subject).to eq 'redbubble/application-stack-name:latest' }
         end
       end
 
@@ -96,7 +96,7 @@ describe KumoTutum::EnvironmentConfig do
         subject { instance.image_tag }
 
         context "when the image name is 'redbubble/assete-wala:latest'" do
-          let(:image_name) { 'redbubble/asset-wala:latest' }
+          let(:image_name) { 'redbubble/application-stack-name:latest' }
           it { expect(subject).to eq 'latest' }
         end
         context "when the image name is 'some-registry/mything:9999'" do
