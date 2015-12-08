@@ -108,7 +108,7 @@ application-stack-name:
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
-      tutum_api = double("TutumApi", stack_by_name: {'sldkfj': 'adofiu'})
+      tutum_api = double("TutumApi", stack_by_name: {"#{app_name}-test": 'stack stuff'})
       allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
       allow_any_instance_of(KumoTutum::StateValidator).to receive(:wait_for_state)
     end
