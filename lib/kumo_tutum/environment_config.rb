@@ -12,8 +12,6 @@ module KumoTutum
       @config_path = options.fetch(:config_path)
       @log         = logger
       @app_name    = options.fetch(:app_name)
-
-      # AssetWala::QueueName.env_name = @env_name
     end
 
     def get_binding
