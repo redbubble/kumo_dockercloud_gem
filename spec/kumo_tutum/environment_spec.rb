@@ -118,9 +118,16 @@ application-stack-name:
       subject
     end
 
-    it 'runs the stack command'
-    it 'deletes the tempfile?'
-    it 'runs the tutum redeploy command'
+    it 'runs the stack command' do
+      expect(env).to receive(:run_command).with(/^tutum stack create -f .* -n application-stack-name-test$/)
+      subject
+    end
+
+    it 'runs the tutum redeploy command' do
+      expect(env).to receive(:run_command).with("tutum stack redeploy application-stack-name-test")
+      subject
+    end
+
     it "makes sure it waits until it's running"
   end
 end
