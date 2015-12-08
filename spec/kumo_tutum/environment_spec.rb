@@ -2,7 +2,7 @@ require 'kumo_tutum/environment'
 require 'kumo_tutum/environment_config'
 
 describe KumoTutum::Environment do
-  subject(:env) { described_class.new(name: 'test', env_vars: {'KEY' => 'VALUE'}, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
+  subject(:env) { described_class.new(name: 'test', env_vars: {'KEY' => 'VALUE'}, app_name: app_name, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
   let(:app_name) { 'application-stack-name' }
   let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
 
@@ -31,7 +31,7 @@ describe KumoTutum::Environment do
     end
 
     it 'creates an EnvironmentConfig' do
-      expect(KumoTutum::EnvironmentConfig).to receive(:new).with(hash_including(config_path: 'a path'))
+      expect(KumoTutum::EnvironmentConfig).to receive(:new).with(hash_including({app_name: app_name, config_path: 'a path'}))
       subject
     end
 

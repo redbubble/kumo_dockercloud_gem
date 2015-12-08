@@ -16,8 +16,9 @@ module KumoTutum
       @env_name = params.fetch(:name)
       @env_vars = params.fetch(:env_vars, {})
       @stack_template_path = params.fetch(:stack_template_path)
+      app_name = params.fetch(:app_name)
 
-      @config   = EnvironmentConfig.new(env_name: @env_name, config_path: params.fetch(:config_path))
+      @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
     def apply
@@ -66,7 +67,7 @@ module KumoTutum
       lambda {
         services = tutum_api.services_by_stack_name(stack_name)
         services.select! { |service| service['name'] != 'geckoboardwidget' }
-        { 'name' => 'services', 'state' => services.map { |s| s['state'] }.uniq.join }
+        {'name' => 'services', 'state' => services.map { |s| s['state'] }.uniq.join}
       }
     end
 
