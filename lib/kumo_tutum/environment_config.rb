@@ -5,14 +5,13 @@ module KumoTutum
   class EnvironmentConfig
     LOGGER = Logger.new(STDOUT)
 
-    APP_NAME = 'application-stack-name' #TODO: Don't hardcode the app name
-
-    attr_reader :env_name
+    attr_reader :env_name, :app_name
 
     def initialize(options, logger = LOGGER)
       @env_name    = options.fetch(:env_name)
       @config_path = options.fetch(:config_path)
       @log         = logger
+      @app_name    = options.fetch(:app_name)
 
       # AssetWala::QueueName.env_name = @env_name
     end
@@ -22,7 +21,7 @@ module KumoTutum
     end
 
     def stack_name
-      "#{APP_NAME}-#{env_name}"
+      "#{app_name}-#{env_name}"
     end
 
     def deploy_tag
@@ -46,7 +45,7 @@ module KumoTutum
       if existing_image_name?
         existing_image_name
       else
-        "redbubble/#{APP_NAME}:latest"
+        "redbubble/#{app_name}:latest"
       end
     end
 

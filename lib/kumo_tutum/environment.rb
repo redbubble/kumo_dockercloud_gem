@@ -37,9 +37,9 @@ module KumoTutum
     def configure_stack(stack_template)
       parsed = YAML.load(ERB.new(stack_template).result(@config.get_binding))
 
-      parsed[EnvironmentConfig::APP_NAME]['environment'] ||= {}
-      parsed[EnvironmentConfig::APP_NAME]['environment'].merge!(@config.plain_text_secrets)
-      parsed[EnvironmentConfig::APP_NAME]['environment'].merge!(@env_vars)
+      parsed[@config.app_name]['environment'] ||= {}
+      parsed[@config.app_name]['environment'].merge!(@config.plain_text_secrets)
+      parsed[@config.app_name]['environment'].merge!(@env_vars)
 
       parsed
     end

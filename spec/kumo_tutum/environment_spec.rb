@@ -3,7 +3,7 @@ require 'kumo_tutum/environment_config'
 
 describe KumoTutum::Environment do
   subject(:env) { described_class.new(name: 'test', env_vars: { 'KEY' => 'VALUE' }, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
-  let(:config) { KumoTutum::EnvironmentConfig.new(env_name: 'test', config_path: 'a path') }
+  let(:config) { KumoTutum::EnvironmentConfig.new(app_name: 'application-stack-name', env_name: 'test', config_path: 'a path') }
 
   let(:plain_text_secrets) do
     {

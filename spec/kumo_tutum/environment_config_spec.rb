@@ -4,7 +4,7 @@ require 'kumo_tutum/tutum_api'
 describe KumoTutum::EnvironmentConfig do
   let(:env_name) { 'test' }
   let(:config_path) { File.join(__dir__, '../fixtures/config') }
-  subject(:instance) { described_class.new(env_name: env_name, config_path: config_path) }
+  subject(:instance) { described_class.new(app_name: 'application-stack-name', env_name: env_name, config_path: config_path) }
 
   let(:tutum_api) { instance_double('KumoTutum::TutumApi') }
 
