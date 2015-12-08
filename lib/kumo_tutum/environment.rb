@@ -4,7 +4,6 @@ require 'tempfile'
 require 'forwardable'
 
 require_relative 'tutum_api'
-# require_relative 'state_validator'
 require_relative 'environment_config'
 
 module KumoTutum
