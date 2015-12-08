@@ -88,7 +88,7 @@ module KumoTutum
     end
 
     def exists?
-      result = evaluate _command('tutum stack list')
+      result = evaluate_command('tutum stack list')
       result.include?(stack_name)
     end
 

@@ -91,6 +91,18 @@ describe KumoTutum::Environment do
     subject { env.apply }
     let(:stack_file_data_yaml) { double("stack_file_data_yaml") }
 
+    let(:configured_stack_file) {
+      <<-YAML
+---
+asset-wala:
+  image: a-thing
+  environment:
+    TEST_ENV: FAKE
+    MORE: ANOTHER
+    KEY: VALUE
+YAML
+    }
+
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return 'asset-wala'
@@ -101,7 +113,7 @@ describe KumoTutum::Environment do
     end
 
     it "writes a stack file" do
-      expect_any_instance_of(Tempfile).to receive(:write).with("---\nasset-wala:\n  image: a-thing\n  environment:\n    TEST_ENV: FAKE\n    MORE: ANOTHER\n    KEY: VALUE\n")
+      expect_any_instance_of(Tempfile).to receive(:write).with(configured_stack_file)
       subject
     end
 
