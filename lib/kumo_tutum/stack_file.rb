@@ -11,8 +11,9 @@ module KumoTutum
 
       converted_env_vars = make_all_root_level_keys_strings(env_vars)
 
-      parsed.each do |key, _|
-        parsed[key.to_s]['environment'].merge!(converted_env_vars.fetch(key.to_s))
+      env_vars.each do |key, _|
+        key_string = key.to_s
+        parsed[key_string]['environment'].merge!(converted_env_vars.fetch(key_string))
       end
 
       parsed

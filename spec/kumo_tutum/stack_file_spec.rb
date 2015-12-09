@@ -85,7 +85,6 @@ describe KumoTutum::StackFile do
         {
           app_name => {'KEY' => 'VALUE'},
           "another_service" => {'KEY2' => 'VALUE2'}
-
         }
       end
 
@@ -98,6 +97,8 @@ describe KumoTutum::StackFile do
           environment:
             KEY: thing
             KEY2: OLD_VALUE
+        third_service:
+          image: third
         eos
       end
 
@@ -116,6 +117,9 @@ describe KumoTutum::StackFile do
               'KEY' => 'thing',
               'KEY2' => 'VALUE2',
             }
+          },
+          'third_service' => {
+            'image' => 'third'
           }
         }
       end
@@ -129,7 +133,6 @@ describe KumoTutum::StackFile do
           {
             app_name => {'KEY' => 'VALUE'},
             another_service: {'KEY2' => 'VALUE2'}
-
           }
         end
 
