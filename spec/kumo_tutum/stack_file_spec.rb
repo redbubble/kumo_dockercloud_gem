@@ -1,3 +1,6 @@
+require_relative '../../lib/kumo_tutum/environment_config'
+require_relative '../../lib/kumo_tutum/stack_file'
+
 describe KumoTutum::StackFile do
 
   let(:app_name) { 'application-stack-name' }
@@ -74,6 +77,65 @@ describe KumoTutum::StackFile do
             'KEY' => 'VALUE'
           }
         })
+      end
+    end
+
+    context 'with other services' do
+      let(:env_vars) do
+        {
+          app_name => {'KEY' => 'VALUE'},
+          "another_service" => {'KEY2' => 'VALUE2'}
+
+        }
+      end
+
+      let(:stack_template) do
+        <<-eos
+        application-stack-name:
+          image: a-thing
+        another_service:
+          image: another
+          environment:
+            KEY: thing
+            KEY2: OLD_VALUE
+        eos
+      end
+
+      let(:expected_stack_file) do
+        {
+          app_name => {
+            'image' => 'a-thing',
+            'environment' => {
+              'TEST_ENV' => 'FAKE',
+              'MORE' => 'ANOTHER',
+              'KEY' => 'VALUE'
+            }},
+          'another_service' => {
+            'image' => 'another',
+            'environment' => {
+              'KEY' => 'thing',
+              'KEY2' => 'VALUE2',
+            }
+          }
+        }
+      end
+
+      it 'should create the environment with variables for other services' do
+        expect(subject).to eq(expected_stack_file)
+      end
+
+      context 'the key is a symbol' do
+        let(:env_vars) do
+          {
+            app_name => {'KEY' => 'VALUE'},
+            another_service: {'KEY2' => 'VALUE2'}
+
+          }
+        end
+
+        it 'handles symbols the same way as strings' do
+          expect(subject).to eq(expected_stack_file)
+        end
       end
     end
   end
