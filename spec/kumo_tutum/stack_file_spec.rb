@@ -5,8 +5,8 @@ describe KumoTutum::StackFile do
   let(:env_vars) { {'KEY' => 'VALUE'} }
   let(:plain_text_secrets) do
     {
-        'TEST_ENV' => 'FAKE',
-        'MORE' => 'ANOTHER'
+      'TEST_ENV' => 'FAKE',
+      'MORE' => 'ANOTHER'
     }
   end
 
@@ -20,19 +20,19 @@ describe KumoTutum::StackFile do
 
     let(:stack_template) do
       <<-eos
-          application-stack-name:
-            image: a-thing
+        application-stack-name:
+          image: a-thing
       eos
     end
 
     it 'adds environment variables to stack config' do
       expect(subject).to eq(app_name => {
-          'image' => 'a-thing',
-          'environment' => {
-              'TEST_ENV' => 'FAKE',
-              'MORE' => 'ANOTHER',
-              'KEY' => 'VALUE'
-          }
+        'image' => 'a-thing',
+        'environment' => {
+          'TEST_ENV' => 'FAKE',
+          'MORE' => 'ANOTHER',
+          'KEY' => 'VALUE'
+        }
       })
     end
 
@@ -47,13 +47,13 @@ describe KumoTutum::StackFile do
       end
       it 'should add new secrets to the environment' do
         expect(subject).to eq(app_name => {
-            'image' => 'a-thing',
-            'environment' => {
-                'TEST' => 'thing',
-                'TEST_ENV' => 'FAKE',
-                'MORE' => 'ANOTHER',
-                'KEY' => 'VALUE'
-            }
+          'image' => 'a-thing',
+          'environment' => {
+            'TEST' => 'thing',
+            'TEST_ENV' => 'FAKE',
+            'MORE' => 'ANOTHER',
+            'KEY' => 'VALUE'
+          }
         })
       end
     end
@@ -67,12 +67,12 @@ describe KumoTutum::StackFile do
       end
       it 'should create the environment with secrets in it' do
         expect(subject).to eq(app_name => {
-            'image' => 'a-thing',
-            'environment' => {
-                'TEST_ENV' => 'FAKE',
-                'MORE' => 'ANOTHER',
-                'KEY' => 'VALUE'
-            }
+          'image' => 'a-thing',
+          'environment' => {
+            'TEST_ENV' => 'FAKE',
+            'MORE' => 'ANOTHER',
+            'KEY' => 'VALUE'
+          }
         })
       end
     end
