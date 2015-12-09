@@ -6,6 +6,7 @@ require 'forwardable'
 require_relative 'tutum_api'
 require_relative 'state_validator'
 require_relative 'environment_config'
+require_relative 'stack_file'
 
 module KumoTutum
   class Environment
@@ -35,17 +36,11 @@ module KumoTutum
       wait_for_running
     end
 
-    def configure_stack(stack_template)
-      parsed = YAML.load(ERB.new(stack_template).result(@config.get_binding))
-
-      parsed[@config.app_name]['environment'] ||= {}
-      parsed[@config.app_name]['environment'].merge!(@config.plain_text_secrets)
-      parsed[@config.app_name]['environment'].merge!(@env_vars)
-
-      parsed
-    end
-
     private
+
+    def configure_stack(stack_template)
+      StackFile.create_from_template(stack_template, @config, @env_vars)
+    end
 
     def wait_for_running
       StateValidator.new(stack_state_provider).wait_for_state('Redeploying')

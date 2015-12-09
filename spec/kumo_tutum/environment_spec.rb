@@ -2,107 +2,33 @@ require 'kumo_tutum/environment'
 require 'kumo_tutum/environment_config'
 
 describe KumoTutum::Environment do
-  subject(:env) { described_class.new(name: 'test', env_vars: {'KEY' => 'VALUE'}, app_name: app_name, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
+  let(:env_vars) { {'KEY' => 'VALUE'} }
   let(:app_name) { 'application-stack-name' }
   let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
 
-  let(:plain_text_secrets) do
+  let(:stack_file) {
     {
-        'TEST_ENV' => 'FAKE',
-        'MORE' => 'ANOTHER'
+      'application-stack-name': {
+        image: 'a-thing',
+        environment: {
+          TEST_ENV: 'FAKE',
+          MORE: 'ANOTHER',
+          KEY: 'VALUE'
+        }
+      }
     }
-  end
+  }
+
+
+  subject(:env) { described_class.new(name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
 
   before do
     allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
-    allow(config).to receive(:plain_text_secrets).and_return(plain_text_secrets)
-
-  end
-
-  describe '#configure_stack' do
-    subject { env.configure_stack(stack_template) }
-
-
-    let(:stack_template) do
-      <<-eos
-          application-stack-name:
-            image: a-thing
-      eos
-    end
-
-    it 'creates an EnvironmentConfig' do
-      expect(KumoTutum::EnvironmentConfig).to receive(:new).with(hash_including({app_name: app_name, config_path: 'a path'}))
-      subject
-    end
-
-    it 'adds environment variables to stack config' do
-      expect(subject).to eq(app_name => {
-          'image' => 'a-thing',
-          'environment' => {
-              'TEST_ENV' => 'FAKE',
-              'MORE' => 'ANOTHER',
-              'KEY' => 'VALUE'
-          }
-      })
-    end
-
-    context 'with some existing environment' do
-      let(:stack_template) do
-        <<-eos
-          application-stack-name:
-            image: a-thing
-            environment:
-              TEST: thing
-        eos
-      end
-      it 'should add new secrets to the environment' do
-        expect(subject).to eq(app_name => {
-            'image' => 'a-thing',
-            'environment' => {
-                'TEST' => 'thing',
-                'TEST_ENV' => 'FAKE',
-                'MORE' => 'ANOTHER',
-                'KEY' => 'VALUE'
-            }
-        })
-      end
-    end
-
-    context 'without any existing environment' do
-      let(:stack_template) do
-        <<-eos
-          application-stack-name:
-            image: a-thing
-        eos
-      end
-      it 'should create the environment with secrets in it' do
-        expect(subject).to eq(app_name => {
-            'image' => 'a-thing',
-            'environment' => {
-                'TEST_ENV' => 'FAKE',
-                'MORE' => 'ANOTHER',
-                'KEY' => 'VALUE'
-            }
-        })
-      end
-    end
+    allow(KumoTutum::StackFile).to receive(:create_from_template).and_return(stack_file)
   end
 
   describe "#apply" do
     subject { env.apply }
-    let(:stack_file_data_yaml) { double("stack_file_data_yaml") }
-
-    let(:configured_stack_file) {
-      <<-YAML
----
-application-stack-name:
-  image: a-thing
-  environment:
-    TEST_ENV: FAKE
-    MORE: ANOTHER
-    KEY: VALUE
-      YAML
-    }
 
     let(:full_stack_name) { "#{app_name}-test" }
 
@@ -116,7 +42,7 @@ application-stack-name:
     end
 
     it "writes a stack file" do
-      expect_any_instance_of(Tempfile).to receive(:write).with(configured_stack_file)
+      expect_any_instance_of(Tempfile).to receive(:write).with(stack_file.to_yaml)
 
       subject
     end
