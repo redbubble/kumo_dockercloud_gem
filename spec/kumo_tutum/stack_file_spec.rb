@@ -2,7 +2,7 @@ describe KumoTutum::StackFile do
 
   let(:app_name) { 'application-stack-name' }
   let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
-  let(:env_vars) { {'KEY' => 'VALUE'} }
+  let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:plain_text_secrets) do
     {
       'TEST_ENV' => 'FAKE',

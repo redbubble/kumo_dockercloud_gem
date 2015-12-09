@@ -2,7 +2,7 @@ require 'kumo_tutum/environment'
 require 'kumo_tutum/environment_config'
 
 describe KumoTutum::Environment do
-  let(:env_vars) { {'KEY' => 'VALUE'} }
+  let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:app_name) { 'application-stack-name' }
   let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
 
@@ -19,8 +19,9 @@ describe KumoTutum::Environment do
     }
   }
 
+  let(:stack_template_path) { File.join(__dir__, '../fixtures/stack.yml.erb') }
 
-  subject(:env) { described_class.new(name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: File.join(__dir__, '../fixtures/stack.yml.erb')) }
+  subject(:env) { described_class.new(name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path) }
 
   before do
     allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
@@ -61,6 +62,12 @@ describe KumoTutum::Environment do
 
     it "makes sure it waits until it's running" do
       expect(KumoTutum::StateValidator).to receive(:new).exactly(3).times.and_return(double(KumoTutum::StateValidator, wait_for_state: nil))
+
+      subject
+    end
+
+    it 'uses the StackFile class' do
+      expect(KumoTutum::StackFile).to receive(:create_from_template).with(File.read(stack_template_path), config, env_vars)
 
       subject
     end

@@ -5,7 +5,7 @@ module KumoTutum
 
       parsed[config.app_name]['environment'] ||= {}
       parsed[config.app_name]['environment'].merge!(config.plain_text_secrets)
-      parsed[config.app_name]['environment'].merge!(env_vars)
+      parsed[config.app_name]['environment'].merge!(env_vars.fetch(config.app_name))
 
       parsed
     end
