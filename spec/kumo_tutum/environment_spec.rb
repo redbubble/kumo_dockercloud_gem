@@ -21,7 +21,9 @@ describe KumoTutum::Environment do
 
   let(:stack_template_path) { File.join(__dir__, '../fixtures/stack.yml.erb') }
 
-  subject(:env) { described_class.new(name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path) }
+  let(:params) { {name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path} }
+
+  subject(:env) { described_class.new(params) }
 
   before do
     allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
@@ -60,10 +62,28 @@ describe KumoTutum::Environment do
       subject
     end
 
-    it "makes sure it waits until it's running" do
-      expect(KumoTutum::StateValidator).to receive(:new).exactly(3).times.and_return(double(KumoTutum::StateValidator, wait_for_state: nil))
+    describe "waiting for running" do
 
-      subject
+      let(:state_validator) { double(KumoTutum::StateValidator, wait_for_state: nil) }
+
+      before do
+        allow(KumoTutum::StateValidator).to receive(:new).exactly(3).times.and_return(state_validator)
+      end
+
+      it "makes sure it waits until it's running" do
+        expect(state_validator).to receive(:wait_for_state).with(anything, 120).exactly(3).times
+        subject
+      end
+
+      context "setting a different timeout value" do
+        let(:params) { {name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path, timeout: 240} }
+
+        it "sends the timeout value to the StateValidator" do
+          expect(state_validator).to receive(:wait_for_state).with(anything, 240).exactly(3).times
+          subject
+        end
+      end
+
     end
 
     it 'uses the StackFile class' do

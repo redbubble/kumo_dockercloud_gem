@@ -9,7 +9,7 @@ module KumoTutum
       @parsed_info = nil
     end
 
-    def wait_for_state(expected_state, time_limit = 120)
+    def wait_for_state(expected_state, time_limit)
       start_time = Time.now
       last_state = nil
 

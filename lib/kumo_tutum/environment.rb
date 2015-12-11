@@ -17,8 +17,9 @@ module KumoTutum
       @env_name = params.fetch(:name)
       @env_vars = params.fetch(:env_vars, {})
       @stack_template_path = params.fetch(:stack_template_path)
-      app_name = params.fetch(:app_name)
+      @timeout = params.fetch(:timeout, 120)
 
+      app_name = params.fetch(:app_name)
       @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
@@ -33,7 +34,7 @@ module KumoTutum
 
       run_command("tutum stack redeploy #{stack_name}")
 
-      wait_for_running
+      wait_for_running(@timeout)
     end
 
     private
@@ -42,10 +43,10 @@ module KumoTutum
       StackFile.create_from_template(stack_template, @config, @env_vars)
     end
 
-    def wait_for_running
-      StateValidator.new(stack_state_provider).wait_for_state('Redeploying')
-      StateValidator.new(stack_state_provider).wait_for_state(expected_state)
-      StateValidator.new(service_state_provider).wait_for_state('Running')
+    def wait_for_running(timeout)
+      StateValidator.new(stack_state_provider).wait_for_state('Redeploying', timeout)
+      StateValidator.new(stack_state_provider).wait_for_state(expected_state, timeout)
+      StateValidator.new(service_state_provider).wait_for_state('Running', timeout)
     end
 
     def expected_state
