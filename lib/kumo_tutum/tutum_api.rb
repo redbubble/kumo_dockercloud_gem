@@ -42,15 +42,15 @@ module KumoTutum
 
     def authorize(options)
       if options[:tutum_auth].nil?
-        if ENV['TUTUM_USER'] && ENV['TUTUM_APIKEY']
+        if !ENV['TUTUM_USER'].nil? && !ENV['TUTUM_APIKEY'].nil?
           options[:username] ||= ENV['TUTUM_USER']
-          options[:api_key] ||= ENV['TUTUM_APIKEY']
+          options[:api_key]  ||= ENV['TUTUM_APIKEY']
         else
           if read_basic_auth != nil
             options[:tutum_auth] = "Basic #{read_basic_auth}"
           else
             options[:username] ||= read_user_id
-            options[:api_key] ||= read_api_key
+            options[:api_key]  ||= read_api_key
           end
         end
       end
