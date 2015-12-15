@@ -54,6 +54,22 @@ describe KumoTutum::TutumApi do
           let(:tutum_user_env) { nil }
           let(:tutum_apikey_env) { nil }
 
+          context 'new .tutum file format' do
+
+            let(:dot_tutum_data) do
+              <<-eos
+                [auth]
+                basic_auth = "secret"
+              eos
+            end
+
+            it do
+              expect(subject.username).to be_nil
+              expect(subject.api_key).to be_nil
+              expect(subject.tutum_auth).to eq('Basic secret')
+            end
+          end
+
           it do
             expect(subject.username).to eq('wilma')
             expect(subject.api_key).to eq('letmein')

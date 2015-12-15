@@ -9,8 +9,12 @@ module KumoTutum
     # Note: Tutum handles the options in a "very" different way.
     def initialize(options = {})
       if options[:tutum_auth].nil?
-        options[:username] ||= ENV['TUTUM_USER'] || read_user_id
-        options[:api_key] ||= ENV['TUTUM_APIKEY'] || read_api_key
+        if read_basic_auth != nil
+          options[:tutum_auth] = "Basic #{read_basic_auth}"
+        else
+          options[:username] ||= ENV['TUTUM_USER'] || read_user_id
+          options[:api_key] ||= ENV['TUTUM_APIKEY'] || read_api_key
+        end
       end
 
       super options
@@ -43,6 +47,11 @@ module KumoTutum
     end
 
     private
+
+    def read_basic_auth
+      return unless tutum_config['basic_auth']
+      tutum_config['basic_auth'][/\"([^@]+)\"/, 1]
+    end
 
     def read_user_id
       tutum_config['user']
