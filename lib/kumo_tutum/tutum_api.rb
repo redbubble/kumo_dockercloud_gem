@@ -8,20 +8,7 @@ module KumoTutum
   class TutumApi < ::Tutum
     # Note: Tutum handles the options in a "very" different way.
     def initialize(options = {})
-      if options[:tutum_auth].nil?
-        if ENV['TUTUM_USER'] && ENV['TUTUM_APIKEY']
-          options[:username] ||= ENV['TUTUM_USER']
-          options[:api_key] ||= ENV['TUTUM_APIKEY']
-        else
-          if read_basic_auth != nil
-            options[:tutum_auth] = "Basic #{read_basic_auth}"
-          else
-            options[:username] ||= read_user_id
-            options[:api_key] ||= read_api_key
-          end
-        end
-      end
-
+      authorize(options)
       super options
     end
 
@@ -52,6 +39,23 @@ module KumoTutum
     end
 
     private
+
+    def authorize(options)
+      if options[:tutum_auth].nil?
+        if ENV['TUTUM_USER'] && ENV['TUTUM_APIKEY']
+          options[:username] ||= ENV['TUTUM_USER']
+          options[:api_key] ||= ENV['TUTUM_APIKEY']
+        else
+          if read_basic_auth != nil
+            options[:tutum_auth] = "Basic #{read_basic_auth}"
+          else
+            options[:username] ||= read_user_id
+            options[:api_key] ||= read_api_key
+          end
+        end
+      end
+      options
+    end
 
     def read_basic_auth
       return unless tutum_config['basic_auth']
