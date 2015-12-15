@@ -68,6 +68,20 @@ describe KumoTutum::TutumApi do
               expect(subject.api_key).to be_nil
               expect(subject.tutum_auth).to eq('Basic secret')
             end
+
+            context "with env vars" do
+
+              let(:tutum_user_env) { "user" }
+              let(:tutum_apikey_env) { "key" }
+
+              it do
+                expect(subject.username).to eq "user"
+                expect(subject.api_key).to eq "key"
+                expect(subject.tutum_auth).to be_nil
+              end
+
+
+            end
           end
 
           it do
