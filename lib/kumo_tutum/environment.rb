@@ -37,6 +37,10 @@ module KumoTutum
       wait_for_running(@timeout)
     end
 
+    def destroy
+      run_command("tutum stack terminate --sync #{stack_name}")
+    end
+
     private
 
     def configure_stack(stack_template)
