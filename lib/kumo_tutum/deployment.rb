@@ -9,12 +9,12 @@ module KumoTutum
 
     class DeploymentError < StandardError; end
 
-    attr_reader :service_uuid, :stack_name, :version, :health_check_path, :version_check_path
+    attr_accessor :app_name
+    attr_reader :stack_name, :version, :health_check_path, :version_check_path
 
-    def initialize(stack_name, version, service_uuid)
+    def initialize(stack_name, version, _ = nil)
       @stack_name = stack_name
       @version = version
-      @service_uuid = service_uuid
 
       @health_check_path = 'site_status'
       @version_check_path = "#{health_check_path}/version"
@@ -31,6 +31,13 @@ module KumoTutum
     end
 
     private
+
+    def service_uuid
+      @service_uuid ||= begin
+        services = tutum_api.services_by_stack_name(stack_name)
+        services.first["uuid"]
+      end
+    end
 
     def tutum_api
       @tutum_api ||= KumoTutum::TutumApi.new
@@ -54,7 +61,7 @@ module KumoTutum
     end
 
     def validate_container_data(container)
-      unless container["name"].start_with?("asset-wala")
+      unless container["name"].start_with?(app_name || "asset-wala")
         puts "Skipping #{container["name"]}"
         return
       end
