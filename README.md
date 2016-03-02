@@ -1,26 +1,33 @@
 # KumoTutum
 
-TODO: Write a gem description
+This is the Redbubble wrapper around creating environments in tutum.  It is built into our rbdevltools container and can then be used during `apply-env` and `deploy` tasks. 
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'kumo_tutum'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install kumo_tutum
+This is installed into the rbdevtools container.
 
 ## Usage
 
-TODO: Write usage instructions here
+Apply env example
+```ruby
+  KumoTutum::Environment.new(
+    name: environment_name,
+    env_vars: env_vars,
+    app_name: 'your-app-here',
+    config_path: File.join('/app', 'config'),
+    stack_template_path: File.join('/app', 'tutum', 'stack.yml.erb')
+  ).apply
+```
+
+Deploy validation example
+```ruby
+begin
+  KumoTutum::Deployment.new(stack_name, version, uuid).validate
+rescue KumoTutum::Deployment::DeploymentError, TimeoutError
+  exit 1
+end
+```
+
 
 ## Contributing
 
