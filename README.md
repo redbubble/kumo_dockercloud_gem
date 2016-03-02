@@ -19,10 +19,10 @@ Apply env example
   ).apply
 ```
 
-Deploy validation example
+Deploy example
 ```ruby
 begin
-  KumoTutum::Deployment.new(stack_name, version, uuid).validate
+  KumoTutum::Stack.new(app_name, env_name).deploy(version)
 rescue KumoTutum::Deployment::DeploymentError, TimeoutError
   exit 1
 end
