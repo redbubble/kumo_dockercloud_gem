@@ -12,7 +12,7 @@ module KumoTutum
     attr_accessor :app_name
     attr_reader :stack_name, :version, :health_check_path, :version_check_path
 
-    def initialize(stack_name, version, _)
+    def initialize(stack_name, version, _ = nil)
       @stack_name = stack_name
       @version = version
 
