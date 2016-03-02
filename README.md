@@ -28,6 +28,16 @@ rescue KumoTutum::Deployment::DeploymentError, TimeoutError
 end
 ```
 
+## Testing changes
+
+Changes to the gem can be manually tested end to end in a project that uses the gem (i.e. http-wala).
+
+- First start the dev-tools container: `baxter kumo tools debug non-production`
+- Re-install the gem: `gem specific_install https://github.com/redbubble/kumo_tutum_gem.git -b <your_branch>`
+- Fire up a console: `irb`
+- Require the gem: `require "ruby_tutum"`
+- Interact with the gem's classes. `KumoTutum::Stack.new('http-wala', 'test').deploy(1518)`
+
 
 ## Contributing
 
