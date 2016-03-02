@@ -1,4 +1,4 @@
-# KumoTutum
+# KumoTutum [![Build status](https://badge.buildkite.com/e9ebd06f4732bbb2a914228ac8816a2bbbeaf8bf0444ea00b4.svg)](https://buildkite.com/redbubble/kumo-tutum-gem)
 
 This is the Redbubble wrapper around creating environments in tutum.  It is built into our rbdevltools container and can then be used during `apply-env` and `deploy` tasks. 
 
