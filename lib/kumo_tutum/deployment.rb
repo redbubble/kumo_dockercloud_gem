@@ -9,15 +9,22 @@ module KumoTutum
 
     class DeploymentError < StandardError; end
 
-    attr_reader :service_uuid, :stack_name, :version, :health_check_path, :version_check_path
+    attr_reader :stack_name, :app_name, :version, :health_check_path, :version_check_path
 
-    def initialize(stack_name, version, service_uuid)
-      @stack_name = stack_name
+    def initialize(app_name, env_name, version)
+      @app_name = app_name
+      @stack_name = "#{app_name}-#{env_name}"
       @version = version
-      @service_uuid = service_uuid
 
       @health_check_path = 'site_status'
       @version_check_path = "#{health_check_path}/version"
+    end
+
+    def deploy
+      tutum_api.services.update(service_uuid, image: "redbubble/#{app_name}:#{@version}")
+      tutum_api.services.redeploy(service_uuid)
+
+      validate
     end
 
     def validate
@@ -31,6 +38,13 @@ module KumoTutum
     end
 
     private
+
+    def service_uuid
+      @service_uuid ||= begin
+        services = tutum_api.services_by_stack_name(@stack_name)
+        services.first["uuid"]
+      end
+    end
 
     def tutum_api
       @tutum_api ||= KumoTutum::TutumApi.new
@@ -54,7 +68,7 @@ module KumoTutum
     end
 
     def validate_container_data(container)
-      unless container["name"].start_with?("asset-wala")
+      unless container["name"].start_with?(app_name)
         puts "Skipping #{container["name"]}"
         return
       end
