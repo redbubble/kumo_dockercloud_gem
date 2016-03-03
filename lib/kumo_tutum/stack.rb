@@ -1,6 +1,6 @@
 module KumoTutum
   class Stack
-    attr_reader :stack_name, :app_name, options
+    attr_reader :stack_name, :app_name, :options
 
     def initialize(app_name, env_name, options = { contactable: true })
       @app_name = app_name
