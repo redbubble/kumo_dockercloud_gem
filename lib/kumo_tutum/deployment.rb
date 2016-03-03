@@ -9,12 +9,13 @@ module KumoTutum
 
     class DeploymentError < StandardError; end
 
-    attr_accessor :app_name
+    attr_accessor :app_name, :contactable
     attr_reader :stack_name, :version, :health_check_path, :version_check_path
 
     def initialize(stack_name, version, _ = nil)
       @stack_name = stack_name
       @version = version
+      @contactable = true
 
       @health_check_path = 'site_status'
       @version_check_path = "#{health_check_path}/version"
@@ -70,8 +71,10 @@ module KumoTutum
       raise "Unexpected number of open container ports" if container['container_ports'].size != 1
       endpoint_uri = container['container_ports'].first['endpoint_uri'].gsub(/^tcp:/, 'http:')
 
-      validate_container_version(endpoint_uri)
-      validate_container_health(endpoint_uri)
+      if contactable
+        validate_container_version(endpoint_uri)
+        validate_container_health(endpoint_uri)
+      end
       print "\n"
     end
 
