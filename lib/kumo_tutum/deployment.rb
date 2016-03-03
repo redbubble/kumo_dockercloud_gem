@@ -103,7 +103,8 @@ module KumoTutum
 
     def safe_http_get(url)
       tries ||= 3
-      HTTPI.get(url)
+      request = HTTPI::Request.new(url: url, open_timeout: 5, read_timeout: 5)
+      HTTPI.get(request)
     rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, Errno::ETIMEDOUT, EOFError,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
       sleep 5
