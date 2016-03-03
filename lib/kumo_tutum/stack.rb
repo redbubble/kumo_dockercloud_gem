@@ -1,10 +1,11 @@
 module KumoTutum
   class Stack
-    attr_reader :stack_name, :app_name
+    attr_reader :stack_name, :app_name, :options
 
-    def initialize(app_name, env_name)
+    def initialize(app_name, env_name, options = { contactable: true })
       @app_name = app_name
       @stack_name = "#{app_name}-#{env_name}"
+      @options = options
     end
 
     def deploy(version)
@@ -26,6 +27,7 @@ module KumoTutum
     def validate_deployment(version)
       deployment = Deployment.new(stack_name, version)
       deployment.app_name = app_name
+      deployment.contactable = options[:contactable]
       deployment.validate
     end
 
