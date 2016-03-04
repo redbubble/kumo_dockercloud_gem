@@ -111,8 +111,12 @@ module KumoTutum
     rescue Timeout::Error, Errno::ECONNREFUSED, Errno::EINVAL, Errno::ECONNRESET, Errno::ETIMEDOUT, EOFError,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
       sleep 5
-      retry unless (tries -= 1).zero?
-    end
 
+      if (tries -= 1).zero?
+        raise e
+      else
+        retry
+      end 
+    end
   end
 end
