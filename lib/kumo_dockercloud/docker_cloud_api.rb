@@ -9,7 +9,7 @@ module KumoDockerCloud
     # Note: DockerCloud handles the options in a "very" different way.
     def initialize(options = {})
       authorize(options)
-      super options
+      super options[:username], options[:api_key]
     end
 
     def stack_by_name(name)

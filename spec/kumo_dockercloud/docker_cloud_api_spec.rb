@@ -4,21 +4,21 @@ require 'webmock/rspec'
 describe KumoDockerCloud::DockerCloudApi do
   describe '#initialize' do
     subject { described_class.new(options) }
-    let(:tutum_user_env) { 'nada user' }
+    let(:docker_cloud_user_env) { 'nada user' }
     let(:docker_cloud_apikey_env) { 'nada key' }
-    let(:dot_tutum_data) do
+    let(:dot_dockercloud_data) do
       <<-eos
         [auth]
         user = wilma
         apikey = letmein
       eos
     end
-    let(:dot_tutum_io_object) { StringIO.new(dot_tutum_data) }
+    let(:dot_dockercloud_io_object) { StringIO.new(dot_dockercloud_data) }
 
     before do
-      allow(ENV).to receive(:[]).with('TUTUM_USER').and_return(tutum_user_env)
-      allow(ENV).to receive(:[]).with('TUTUM_APIKEY').and_return(docker_cloud_apikey_env)
-      allow_any_instance_of(described_class).to receive(:tutum_config_file).and_return(dot_tutum_io_object)
+      allow(ENV).to receive(:[]).with('DOCKERCLOUD_USER').and_return(docker_cloud_user_env)
+      allow(ENV).to receive(:[]).with('DOCKERCLOUD_APIKEY').and_return(docker_cloud_apikey_env)
+      allow_any_instance_of(described_class).to receive(:dockercloud_config_file).and_return(dot_dockercloud_io_object)
     end
 
     context 'appropriately fills default credentials' do
@@ -51,12 +51,12 @@ describe KumoDockerCloud::DockerCloudApi do
 
         context 'reading ~/.tutum' do
           let(:options) { {} }
-          let(:tutum_user_env) { nil }
+          let(:docker_cloud_user_env) { nil }
           let(:docker_cloud_apikey_env) { nil }
 
           context 'new .tutum file format' do
 
-            let(:dot_tutum_data) do
+            let(:dot_dockercloud_data) do
               <<-eos
                 [auth]
                 basic_auth = "secret"
@@ -71,7 +71,7 @@ describe KumoDockerCloud::DockerCloudApi do
 
             context "with env vars" do
 
-              let(:tutum_user_env) { "user" }
+              let(:docker_cloud_user_env) { "user" }
               let(:docker_cloud_apikey_env) { "key" }
 
               it do
@@ -97,16 +97,16 @@ describe KumoDockerCloud::DockerCloudApi do
     subject(:api) { KumoDockerCloud::DockerCloudApi.new }
 
     before do
-      allow_any_instance_of(KumoDockerCloud::DockerCloudApi).to receive(:tutum_config).and_return({})
+      allow_any_instance_of(KumoDockerCloud::DockerCloudApi).to receive(:docker_cloud_config).and_return({})
     end
 
-    describe '#tutum_config_file' do
+    describe '#docker_cloud_config_file' do
       context do
-        subject { api.send(:tutum_config_file) }
+        subject { api.send(:docker_cloud_config_file) }
 
         it do
-          expect(File).to receive(:expand_path).with('~/.tutum').and_return(:dot_tutum_path)
-          expect(File).to receive(:open).with(:dot_tutum_path).and_return(:output_data)
+          expect(File).to receive(:expand_path).with('~/.docker-cloud').and_return(:dot_dockercloud_path)
+          expect(File).to receive(:open).with(:dot_dockercloud_path).and_return(:output_data)
 
           expect(subject).to eq(:output_data)
         end
