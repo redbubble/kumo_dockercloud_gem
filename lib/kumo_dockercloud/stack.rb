@@ -1,4 +1,4 @@
-module KumoTutum
+module KumoDockerCloud
   class Stack
     attr_reader :stack_name, :app_name, :options
 
@@ -17,11 +17,11 @@ module KumoTutum
     private
 
     def update_image(version)
-      tutum_api.services.update(service_uuid, image: "redbubble/#{app_name}:#{version}")
+      docker_cloud_api.services.update(service_uuid, image: "redbubble/#{app_name}:#{version}")
     end
 
     def redeploy
-      tutum_api.services.redeploy(service_uuid)
+      docker_cloud_api.services.redeploy(service_uuid)
     end
 
     def validate_deployment(version)
@@ -33,13 +33,13 @@ module KumoTutum
 
     def service_uuid
       @service_uuid ||= begin
-        services = tutum_api.services_by_stack_name(stack_name)
+        services = docker_cloud_api.services_by_stack_name(stack_name)
         services.first["uuid"]
       end
     end
 
-    def tutum_api
-      @tutum_api ||= KumoTutum::TutumApi.new
+    def docker_cloud_api
+      @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
     end
 
   end

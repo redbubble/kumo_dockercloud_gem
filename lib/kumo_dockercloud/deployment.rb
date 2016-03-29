@@ -1,10 +1,10 @@
 require 'time'
 require 'httpi'
 
-require_relative 'tutum_api'
+require_relative 'docker_cloud_api'
 require_relative 'state_validator'
 
-module KumoTutum
+module KumoDockerCloud
   class Deployment
 
     class DeploymentError < StandardError; end
@@ -27,7 +27,7 @@ module KumoTutum
     end
 
     def wait_for_running_state
-      service_state_provider = lambda { tutum_api.services.get(service_uuid) }
+      service_state_provider = lambda { docker_cloud_api.services.get(service_uuid) }
       StateValidator.new(service_state_provider).wait_for_state('Running', 240)
     end
 
@@ -35,13 +35,13 @@ module KumoTutum
 
     def service_uuid
       @service_uuid ||= begin
-        services = tutum_api.services_by_stack_name(stack_name)
+        services = docker_cloud_api.services_by_stack_name(stack_name)
         services.first["uuid"]
       end
     end
 
-    def tutum_api
-      @tutum_api ||= KumoTutum::TutumApi.new
+    def docker_cloud_api
+      @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
     end
 
     def current_state
@@ -52,7 +52,7 @@ module KumoTutum
     def validate_containers
       puts "Getting containers"
 
-      containers = tutum_api.containers_by_stack_name(stack_name)
+      containers = docker_cloud_api.containers_by_stack_name(stack_name)
 
       HTTPI.log = false
 

@@ -1,6 +1,6 @@
 require 'time'
 
-module KumoTutum
+module KumoDockerCloud
   class StateValidator
     attr_reader :state_provider
 

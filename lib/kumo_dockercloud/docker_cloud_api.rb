@@ -1,12 +1,12 @@
-require 'tutum'
+require 'docker_cloud'
 
-module KumoTutum
+module KumoDockerCloud
   def self.uuid_from_uri(uri)
     uri.split('/')[-1]
   end
 
-  class TutumApi < ::Tutum
-    # Note: Tutum handles the options in a "very" different way.
+  class DockerCloudApi < ::DockerCloud::Client
+    # Note: DockerCloud handles the options in a "very" different way.
     def initialize(options = {})
       authorize(options)
       super options
@@ -20,34 +20,34 @@ module KumoTutum
       stack = stack_by_name(stack_name)
       return [] unless stack
       stack['services'].collect do |uri|
-        services.get(KumoTutum.uuid_from_uri(uri))
+        services.get(KumoDockerCloud.uuid_from_uri(uri))
       end
     end
 
     def containers_by_stack_name(stack_name)
       services_by_stack_name(stack_name).collect do |data|
         data['containers'].collect do |uri|
-          containers.get(KumoTutum.uuid_from_uri(uri))
+          containers.get(KumoDockerCloud.uuid_from_uri(uri))
         end
       end.flatten
     end
 
     def nodes_by_stack_name(stack_name)
       containers_by_stack_name(stack_name).collect do |data|
-        nodes.get(KumoTutum.uuid_from_uri(data['node']))
+        nodes.get(KumoDockerCloud.uuid_from_uri(data['node']))
       end
     end
 
     private
 
     def authorize(options)
-      if options[:tutum_auth].nil?
-        if !ENV['TUTUM_USER'].nil? && !ENV['TUTUM_APIKEY'].nil?
-          options[:username] ||= ENV['TUTUM_USER']
-          options[:api_key]  ||= ENV['TUTUM_APIKEY']
+      if options[:auth_header].nil?
+        if !ENV['DOCKERCLOUD_USER'].nil? && !ENV['DOCKERCLOUD_APIKEY'].nil?
+          options[:username] ||= ENV['DOCKERCLOUD_USER']
+          options[:api_key]  ||= ENV['DOCKERCLOUD_APIKEY']
         else
           if read_basic_auth != nil
-            options[:tutum_auth] = "Basic #{read_basic_auth}"
+            options[:auth_header] = "Basic #{read_basic_auth}"
           else
             options[:username] ||= read_user_id
             options[:api_key]  ||= read_api_key
@@ -58,27 +58,27 @@ module KumoTutum
     end
 
     def read_basic_auth
-      return unless tutum_config['basic_auth']
-      tutum_config['basic_auth'][/\"([^@]+)\"/, 1]
+      return unless docker_cloud_config['basic_auth']
+      docker_cloud_config['basic_auth'][/\"([^@]+)\"/, 1]
     end
 
     def read_user_id
-      tutum_config['user']
+      docker_cloud_config['user']
     end
 
     def read_api_key
-      tutum_config['apikey']
+      docker_cloud_config['apikey']
     end
 
-    def tutum_config_file
-      File.open(File.expand_path('~/.tutum'))
+    def docker_cloud_config_file
+      File.open(File.expand_path('~/.docker-cloud'))
     end
 
-    def tutum_config
+    def docker_cloud_config
       if @config_data.nil?
         @config_data = {}
 
-        handle = tutum_config_file
+        handle = docker_cloud_config_file
         handle.each_line do |line|
           parts = line.split('=', 2)
           @config_data[parts[0].strip] = parts[1].strip if parts.length == 2 # ignore ini headers

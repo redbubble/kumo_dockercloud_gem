@@ -1,10 +1,10 @@
-require 'kumo_tutum/environment'
-require 'kumo_tutum/environment_config'
+require 'kumo_dockercloud/environment'
+require 'kumo_dockercloud/environment_config'
 
-describe KumoTutum::Environment do
+describe KumoDockerCloud::Environment do
   let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:app_name) { 'application-stack-name' }
-  let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
+  let(:config) { KumoDockerCloud::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
 
   let(:stack_file) {
     {
@@ -26,8 +26,8 @@ describe KumoTutum::Environment do
   subject(:env) { described_class.new(params) }
 
   before do
-    allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
-    allow(KumoTutum::StackFile).to receive(:create_from_template).and_return(stack_file)
+    allow(KumoDockerCloud::EnvironmentConfig).to receive(:new).and_return(config)
+    allow(KumoDockerCloud::StackFile).to receive(:create_from_template).and_return(stack_file)
   end
 
   describe "#apply" do
@@ -39,9 +39,9 @@ describe KumoTutum::Environment do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
-      tutum_api = double("TutumApi", stack_by_name: {"#{full_stack_name}": 'stack stuff'})
-      allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
-      allow_any_instance_of(KumoTutum::StateValidator).to receive(:wait_for_state)
+      docker_cloud_api = double("DockerCloudApi", stack_by_name: {"#{full_stack_name}": 'stack stuff'})
+      allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
+      allow_any_instance_of(KumoDockerCloud::StateValidator).to receive(:wait_for_state)
     end
 
     it "writes a stack file" do
@@ -64,10 +64,10 @@ describe KumoTutum::Environment do
 
     describe "waiting for running" do
 
-      let(:state_validator) { double(KumoTutum::StateValidator, wait_for_state: nil) }
+      let(:state_validator) { double(KumoDockerCloud::StateValidator, wait_for_state: nil) }
 
       before do
-        allow(KumoTutum::StateValidator).to receive(:new).exactly(3).times.and_return(state_validator)
+        allow(KumoDockerCloud::StateValidator).to receive(:new).exactly(3).times.and_return(state_validator)
       end
 
       it "makes sure it waits until it's running" do
@@ -87,7 +87,7 @@ describe KumoTutum::Environment do
     end
 
     it 'uses the StackFile class' do
-      expect(KumoTutum::StackFile).to receive(:create_from_template).with(File.read(stack_template_path), config, env_vars)
+      expect(KumoDockerCloud::StackFile).to receive(:create_from_template).with(File.read(stack_template_path), config, env_vars)
 
       subject
     end

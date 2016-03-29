@@ -1,15 +1,15 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'kumo_tutum/version'
+require 'kumo_dockercloud/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'kumo_tutum'
-  spec.version       = KumoTutum::VERSION
+  spec.name          = 'kumo_dockercloud'
+  spec.version       = KumoDockerCloud::VERSION
   spec.authors       = %w(Redbubble)
   spec.email         = %w(developers@redbubble.com)
-  spec.summary       = %q{Use to create Redbubble environments on the Tutum platform}
-  spec.description   = %q{Use to create Redbubble environments on the Tutum platform}
+  spec.summary       = %q{Use to create Redbubble environments on the DockerCloud platform}
+  spec.description   = %q{Use to create Redbubble environments on the DockerCloud platform}
   spec.homepage      = ''
   spec.license       = 'mit'
 

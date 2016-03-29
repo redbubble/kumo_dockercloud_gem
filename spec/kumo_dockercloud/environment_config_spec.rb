@@ -1,12 +1,12 @@
-require 'kumo_tutum/environment_config'
-require 'kumo_tutum/tutum_api'
+require 'kumo_dockercloud/environment_config'
+require 'kumo_dockercloud/docker_cloud_api'
 
-describe KumoTutum::EnvironmentConfig do
+describe KumoDockerCloud::EnvironmentConfig do
   let(:env_name) { 'test' }
   let(:config_path) { File.join(__dir__, '../fixtures/config') }
   subject(:instance) { described_class.new(app_name: 'application-stack-name', env_name: env_name, config_path: config_path) }
 
-  let(:tutum_api) { instance_double('KumoTutum::TutumApi') }
+  let(:docker_cloud_api) { instance_double('KumoDockerCloud::DockerCloudApi') }
 
   describe '#get_binding' do
     let(:services_for_stack) { [] }
@@ -67,8 +67,8 @@ describe KumoTutum::EnvironmentConfig do
 
     context 'with Tutum API mocked' do
       before do
-        allow(KumoTutum::TutumApi).to receive(:new).and_return tutum_api
-        allow(tutum_api).to receive(:services_by_stack_name).with("application-stack-name-#{env_name}").and_return(services_for_stack)
+        allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
+        allow(docker_cloud_api).to receive(:services_by_stack_name).with("application-stack-name-#{env_name}").and_return(services_for_stack)
       end
 
       describe '#image_name' do

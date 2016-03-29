@@ -1,3 +1,3 @@
-module KumoTutum
+module KumoDockerCloud
   VERSION = '0.0.10'
 end

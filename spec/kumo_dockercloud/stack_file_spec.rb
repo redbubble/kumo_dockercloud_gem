@@ -1,10 +1,10 @@
-require_relative '../../lib/kumo_tutum/environment_config'
-require_relative '../../lib/kumo_tutum/stack_file'
+require_relative '../../lib/kumo_dockercloud/environment_config'
+require_relative '../../lib/kumo_dockercloud/stack_file'
 
-describe KumoTutum::StackFile do
+describe KumoDockerCloud::StackFile do
 
   let(:app_name) { 'application-stack-name' }
-  let(:config) { KumoTutum::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
+  let(:config) { KumoDockerCloud::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
   let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:plain_text_secrets) do
     {
@@ -14,7 +14,7 @@ describe KumoTutum::StackFile do
   end
 
   before do
-    allow(KumoTutum::EnvironmentConfig).to receive(:new).and_return(config)
+    allow(KumoDockerCloud::EnvironmentConfig).to receive(:new).and_return(config)
     allow(config).to receive(:plain_text_secrets).and_return(plain_text_secrets)
   end
 

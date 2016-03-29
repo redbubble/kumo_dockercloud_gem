@@ -1,11 +1,11 @@
-require 'kumo_tutum/tutum_api'
+require 'kumo_dockercloud/docker_cloud_api'
 require 'webmock/rspec'
 
-describe KumoTutum::TutumApi do
+describe KumoDockerCloud::DockerCloudApi do
   describe '#initialize' do
     subject { described_class.new(options) }
     let(:tutum_user_env) { 'nada user' }
-    let(:tutum_apikey_env) { 'nada key' }
+    let(:docker_cloud_apikey_env) { 'nada key' }
     let(:dot_tutum_data) do
       <<-eos
         [auth]
@@ -17,21 +17,21 @@ describe KumoTutum::TutumApi do
 
     before do
       allow(ENV).to receive(:[]).with('TUTUM_USER').and_return(tutum_user_env)
-      allow(ENV).to receive(:[]).with('TUTUM_APIKEY').and_return(tutum_apikey_env)
+      allow(ENV).to receive(:[]).with('TUTUM_APIKEY').and_return(docker_cloud_apikey_env)
       allow_any_instance_of(described_class).to receive(:tutum_config_file).and_return(dot_tutum_io_object)
     end
 
     context 'appropriately fills default credentials' do
-      context 'tutum_auth in options' do
-        let(:options) { { tutum_auth: 'fred' } }
+      context 'auth_header in options' do
+        let(:options) { { auth_header: 'fred' } }
         it 'overrides nothing' do
           expect(subject.username).to be_nil
           expect(subject.api_key).to be_nil
-          expect(subject.tutum_auth).to eq('fred')
+          expect(subject.auth_header).to eq('fred')
         end
       end
 
-      context 'tutum_auth not given' do
+      context 'auth_header not given' do
         context 'pass in username/api_key options' do
           let(:options) { { username: 'fred', api_key: 'barney' } }
 
@@ -52,7 +52,7 @@ describe KumoTutum::TutumApi do
         context 'reading ~/.tutum' do
           let(:options) { {} }
           let(:tutum_user_env) { nil }
-          let(:tutum_apikey_env) { nil }
+          let(:docker_cloud_apikey_env) { nil }
 
           context 'new .tutum file format' do
 
@@ -66,18 +66,18 @@ describe KumoTutum::TutumApi do
             it do
               expect(subject.username).to be_nil
               expect(subject.api_key).to be_nil
-              expect(subject.tutum_auth).to eq('Basic secret')
+              expect(subject.auth_header).to eq('Basic secret')
             end
 
             context "with env vars" do
 
               let(:tutum_user_env) { "user" }
-              let(:tutum_apikey_env) { "key" }
+              let(:docker_cloud_apikey_env) { "key" }
 
               it do
                 expect(subject.username).to eq "user"
                 expect(subject.api_key).to eq "key"
-                expect(subject.tutum_auth).to be_nil
+                expect(subject.auth_header).to be_nil
               end
 
 
@@ -94,10 +94,10 @@ describe KumoTutum::TutumApi do
   end
 
   context 'with API creds mocked' do
-    subject(:api) { KumoTutum::TutumApi.new }
+    subject(:api) { KumoDockerCloud::DockerCloudApi.new }
 
     before do
-      allow_any_instance_of(KumoTutum::TutumApi).to receive(:tutum_config).and_return({})
+      allow_any_instance_of(KumoDockerCloud::DockerCloudApi).to receive(:tutum_config).and_return({})
     end
 
     describe '#tutum_config_file' do
@@ -371,7 +371,7 @@ describe KumoTutum::TutumApi do
   end
 end
 
-describe KumoTutum do
+describe KumoDockerCloud do
   describe '#uuid_from_uri' do
     subject { described_class.uuid_from_uri(uri) }
 
