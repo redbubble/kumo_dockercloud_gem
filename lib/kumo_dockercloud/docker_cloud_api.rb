@@ -1,4 +1,5 @@
 require 'docker_cloud'
+require 'base64' # left out of DockerCloud gem
 
 module KumoDockerCloud
   def self.uuid_from_uri(uri)
@@ -13,7 +14,7 @@ module KumoDockerCloud
     end
 
     def stack_by_name(name)
-      stacks.list['objects'].find { |s| s['name'].eql? name }
+      stacks.all['objects'].find { |s| s['name'].eql? name }
     end
 
     def services_by_stack_name(stack_name)

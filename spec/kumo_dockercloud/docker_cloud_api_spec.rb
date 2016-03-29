@@ -18,83 +18,66 @@ describe KumoDockerCloud::DockerCloudApi do
     before do
       allow(ENV).to receive(:[]).with('DOCKERCLOUD_USER').and_return(docker_cloud_user_env)
       allow(ENV).to receive(:[]).with('DOCKERCLOUD_APIKEY').and_return(docker_cloud_apikey_env)
-      allow_any_instance_of(described_class).to receive(:dockercloud_config_file).and_return(dot_dockercloud_io_object)
+      allow_any_instance_of(described_class).to receive(:docker_cloud_config_file).and_return(dot_dockercloud_io_object)
     end
 
     context 'appropriately fills default credentials' do
-      context 'auth_header in options' do
-        let(:options) { { auth_header: 'fred' } }
-        it 'overrides nothing' do
-          expect(subject.username).to be_nil
-          expect(subject.api_key).to be_nil
-          expect(subject.auth_header).to eq('fred')
+      context 'pass in username/api_key options' do
+        let(:options) { { username: 'fred', api_key: 'barney' } }
+
+        it 'uses options passed in' do
+          expect(subject.headers['Authorization']).to eq('Basic ZnJlZDpiYXJuZXk=')
         end
       end
 
-      context 'auth_header not given' do
-        context 'pass in username/api_key options' do
-          let(:options) { { username: 'fred', api_key: 'barney' } }
-
-          it 'uses options passed in' do
-            expect(subject.username).to eq('fred')
-            expect(subject.api_key).to eq('barney')
-          end
+      context 'with env variables set' do
+        let(:options) { {} }
+        it 'sets username/password from env vars' do
+          expect(subject.headers['Authorization']).to eq('Basic bmFkYSB1c2VyOm5hZGEga2V5')
         end
+      end
 
-        context 'with env variables set' do
-          let(:options) { {} }
-          it 'sets username/password from env vars' do
-            expect(subject.username).to eq('nada user')
-            expect(subject.api_key).to eq('nada key')
-          end
-        end
+      context 'reading ~/.docker-cloud' do
+        let(:options) { {} }
+        let(:docker_cloud_user_env) { nil }
+        let(:docker_cloud_apikey_env) { nil }
 
-        context 'reading ~/.tutum' do
-          let(:options) { {} }
-          let(:docker_cloud_user_env) { nil }
-          let(:docker_cloud_apikey_env) { nil }
+        context 'new .docker-cloud file format' do
 
-          context 'new .tutum file format' do
-
-            let(:dot_dockercloud_data) do
-              <<-eos
+          let(:dot_dockercloud_data) do
+            <<-eos
                 [auth]
-                basic_auth = "secret"
+                user = barney
+                apikey = betty
               eos
-            end
-
-            it do
-              expect(subject.username).to be_nil
-              expect(subject.api_key).to be_nil
-              expect(subject.auth_header).to eq('Basic secret')
-            end
-
-            context "with env vars" do
-
-              let(:docker_cloud_user_env) { "user" }
-              let(:docker_cloud_apikey_env) { "key" }
-
-              it do
-                expect(subject.username).to eq "user"
-                expect(subject.api_key).to eq "key"
-                expect(subject.auth_header).to be_nil
-              end
-
-
-            end
           end
 
           it do
-            expect(subject.username).to eq('wilma')
-            expect(subject.api_key).to eq('letmein')
+            expect(subject.headers['Authorization']).to eq('Basic YmFybmV5OmJldHR5')
           end
+
+          context "with env vars" do
+
+            let(:docker_cloud_user_env) { "user" }
+            let(:docker_cloud_apikey_env) { "key" }
+
+            it do
+              expect(subject.username).to eq "user"
+            end
+
+
+          end
+        end
+
+        it do
+          expect(subject.username).to eq('wilma')
         end
       end
     end
   end
 
   context 'with API creds mocked' do
-    subject(:api) { KumoDockerCloud::DockerCloudApi.new }
+    subject(:api) { KumoDockerCloud::DockerCloudApi.new(username: 'pebbles', api_key: 'bam bam') }
 
     before do
       allow_any_instance_of(KumoDockerCloud::DockerCloudApi).to receive(:docker_cloud_config).and_return({})
@@ -240,7 +223,7 @@ describe KumoDockerCloud::DockerCloudApi do
         end
 
         before do
-          stub_request(:get, 'https://dashboard.tutum.co/api/v1/stack/')
+          stub_request(:get, "https://pebbles:bam%20bam@cloud.docker.com/api/app/v1/stack/")
             .to_return(status: 200, body: stack_list_json)
         end
 
