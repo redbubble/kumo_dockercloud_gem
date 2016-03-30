@@ -43,7 +43,7 @@ module KumoDockerCloud
       if existing_image_name?
         existing_image_name
       else
-        "redbubble/#{app_name}:latest"
+        "redbubble/#{app_name}:master"
       end
     end
 

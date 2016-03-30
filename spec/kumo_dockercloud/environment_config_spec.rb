@@ -86,7 +86,7 @@ describe KumoDockerCloud::EnvironmentConfig do
         context 'when there is no service for the given stack' do
           let(:services_for_stack) { [] }
 
-          it { expect(subject).to eq 'redbubble/application-stack-name:latest' }
+          it { expect(subject).to eq 'redbubble/application-stack-name:master' }
         end
       end
 
