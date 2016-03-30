@@ -65,7 +65,7 @@ describe KumoDockerCloud::EnvironmentConfig do
       end
     end
 
-    context 'with Tutum API mocked' do
+    context 'with API mocked' do
       before do
         allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
         allow(docker_cloud_api).to receive(:services_by_stack_name).with("application-stack-name-#{env_name}").and_return(services_for_stack)
@@ -74,7 +74,7 @@ describe KumoDockerCloud::EnvironmentConfig do
       describe '#image_name' do
         let(:string) { 'image_name' }
 
-        context 'when there is a tutum service for the given stack' do
+        context 'when there is a service for the given stack' do
           let(:image_name) { 'redbubble/application-stack-name:1234' }
           let(:services_for_stack) { [ double(DockerCloud::Service, image_name: image_name) ] }
 
@@ -83,7 +83,7 @@ describe KumoDockerCloud::EnvironmentConfig do
           end
         end
 
-        context 'when there is no tutum service for the given stack' do
+        context 'when there is no service for the given stack' do
           let(:services_for_stack) { [] }
 
           it { expect(subject).to eq 'redbubble/application-stack-name:latest' }

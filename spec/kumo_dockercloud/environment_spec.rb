@@ -51,13 +51,13 @@ describe KumoDockerCloud::Environment do
     end
 
     it 'runs the stack command' do
-      expect(env).to receive(:run_command).with(%r{^tutum stack create -f .* -n #{full_stack_name}$})
+      expect(env).to receive(:run_command).with(%r{^docker-cloud stack create -f .* -n #{full_stack_name}$})
 
       subject
     end
 
-    it 'runs the tutum redeploy command' do
-      expect(env).to receive(:run_command).with("tutum stack redeploy #{full_stack_name}")
+    it 'runs the redeploy command' do
+      expect(env).to receive(:run_command).with("docker-cloud stack redeploy #{full_stack_name}")
 
       subject
     end

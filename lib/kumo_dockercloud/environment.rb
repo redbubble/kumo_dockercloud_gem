@@ -32,13 +32,13 @@ module KumoDockerCloud
       run_command(stack_command(stack_file))
       stack_file.unlink
 
-      run_command("tutum stack redeploy #{stack_name}")
+      run_command("docker-cloud stack redeploy #{stack_name}")
 
       wait_for_running(@timeout)
     end
 
     def destroy
-      run_command("tutum stack terminate --sync #{stack_name}")
+      run_command("docker-cloud stack terminate --sync #{stack_name}")
     end
 
     private
@@ -85,19 +85,19 @@ module KumoDockerCloud
 
     def stack_command(stack_file)
       if exists?
-        "tutum stack update -f #{stack_file.path} #{stack_name}"
+        "docker-cloud stack update -f #{stack_file.path} #{stack_name}"
       else
-        "tutum stack create -f #{stack_file.path} -n #{stack_name}"
+        "docker-cloud stack create -f #{stack_file.path} -n #{stack_name}"
       end
     end
 
     def exists?
-      result = evaluate_command('tutum stack list')
+      result = evaluate_command('docker-cloud stack list')
       result.include?(stack_name)
     end
 
     def write_stack_config_file(stack_file_data)
-      output_file = Tempfile.new('tutum_stack_config')
+      output_file = Tempfile.new('docker-cloud_stack_config')
       output_file.write(stack_file_data.to_yaml)
       output_file.close
       output_file
