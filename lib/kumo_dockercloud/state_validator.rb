@@ -1,12 +1,12 @@
 require 'time'
 
-module KumoTutum
+module KumoDockerCloud
   class StateValidator
     attr_reader :state_provider
 
     def initialize(state_provider)
       @state_provider = state_provider
-      @parsed_info = nil
+      @stateful = nil
     end
 
     def wait_for_state(expected_state, time_limit)
@@ -14,10 +14,10 @@ module KumoTutum
       last_state = nil
 
       while Time.now.to_i - start_time.to_i < time_limit
-        @parsed_info = state_provider.call
+        @stateful = state_provider.call
 
         if last_state != current_state
-          print "\n#{@parsed_info['name']} is currently #{current_state}"
+          print "\n#{@stateful[:name]} is currently #{current_state}"
         else
           print "."
         end
@@ -40,8 +40,8 @@ module KumoTutum
     private
 
     def current_state
-      return 'an unknown state' if @parsed_info.nil?
-      @parsed_info.fetch('state', 'an unknown state')
+      return 'an unknown state' if @stateful.nil?
+      @stateful.fetch(:state, 'an unknown state')
     end
 
   end

@@ -3,12 +3,12 @@ require 'erb'
 require 'tempfile'
 require 'forwardable'
 
-require_relative 'tutum_api'
+require_relative 'docker_cloud_api'
 require_relative 'state_validator'
 require_relative 'environment_config'
 require_relative 'stack_file'
 
-module KumoTutum
+module KumoDockerCloud
   class Environment
     extend ::Forwardable
     def_delegators :@config, :stack_name, :env_name
@@ -58,16 +58,19 @@ module KumoTutum
     end
 
     def stack_state_provider
-      tutum_api = TutumApi.new
-      lambda { tutum_api.stack_by_name(stack_name) }
+      docker_cloud_api = DockerCloudApi.new
+      lambda {
+        stack = docker_cloud_api.stack_by_name(stack_name)
+        { name: stack.name, state: stack.state }
+      }
     end
 
     def service_state_provider
-      tutum_api = TutumApi.new
+      docker_cloud_api = DockerCloudApi.new
       lambda {
-        services = tutum_api.services_by_stack_name(stack_name)
-        services.select! { |service| service['name'] != 'geckoboardwidget' }
-        {'name' => 'services', 'state' => services.map { |s| s['state'] }.uniq.join}
+        services = docker_cloud_api.services_by_stack_name(stack_name)
+        services.select! { |service| service.name != 'geckoboardwidget' }
+        { name: 'services', state: services.map { |s| s.state }.uniq.join }
       }
     end
 

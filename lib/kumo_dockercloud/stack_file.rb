@@ -1,6 +1,6 @@
 require 'yaml'
 
-module KumoTutum
+module KumoDockerCloud
   module StackFile
     def self.create_from_template(stack_template, config, env_vars)
       parsed = YAML.load(ERB.new(stack_template).result(config.get_binding))

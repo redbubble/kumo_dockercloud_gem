@@ -1,7 +1,7 @@
 require 'kumo_ki'
 require 'logger'
 
-module KumoTutum
+module KumoDockerCloud
   class EnvironmentConfig
     LOGGER = Logger.new(STDOUT)
 
@@ -84,12 +84,12 @@ module KumoTutum
     end
 
     def existing_image_name
-      @service_data ||= tutum_api.services_by_stack_name(stack_name).first
-      @service_data ? @service_data['image_name'] : nil
+      @service ||= docker_cloud_api.services_by_stack_name(stack_name).first
+      @service ? @service.image_name : nil
     end
 
-    def tutum_api
-      @tutum_api ||= KumoTutum::TutumApi.new
+    def docker_cloud_api
+      @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
     end
 
     def kms
