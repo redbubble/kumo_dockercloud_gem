@@ -80,6 +80,29 @@ describe KumoDockerCloud::StackFile do
       end
     end
 
+    context 'no app name env var' do
+      let(:env_vars) do
+        { }
+      end
+
+      let(:stack_template) do
+        <<-eos
+          application-stack-name:
+            image: a-thing
+        eos
+      end
+
+      it 'should create the environment with secrets in it' do
+        expect(subject).to eq(app_name => {
+          'image' => 'a-thing',
+          'environment' => {
+            'TEST_ENV' => 'FAKE',
+            'MORE' => 'ANOTHER'
+          }
+        })
+      end
+    end
+
     context 'with other services' do
       let(:env_vars) do
         {
