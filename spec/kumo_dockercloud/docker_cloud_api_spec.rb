@@ -2,10 +2,48 @@ require 'kumo_dockercloud/docker_cloud_api'
 require 'webmock/rspec'
 
 describe KumoDockerCloud::DockerCloudApi do
-  let(:api) { KumoDockerCloud::DockerCloudApi.new(username: 'pebbles', api_key: 'bam bam') }
+  let(:username) { 'pebbles' }
+  let(:api_key) { 'bam bam' }
+  let(:api) { KumoDockerCloud::DockerCloudApi.new(username: username, api_key: api_key) }
   let(:stack) { double(DockerCloud::Stack, name: stack_name, services: services) }
   let(:stack_name) { "foo" }
   let(:services) { [] }
+
+  describe '#initialize' do
+    subject { api }
+
+    it "passes through username and api_key from hash" do
+      expect(::DockerCloud::Client).to receive(:new).with(username, api_key)
+      subject
+    end
+
+    context "without params" do
+      subject { KumoDockerCloud::DockerCloudApi.new }
+
+      after do
+        ENV.delete('DOCKERCLOUD_USER')
+        ENV.delete('DOCKERCLOUD_APIKEY')
+      end
+
+      it "uses user name from env variable DOCKERCLOUD_USER" do
+        ENV['DOCKERCLOUD_USER'] = username
+        expect(::DockerCloud::Client).to receive(:new).with(username, anything)
+        subject
+      end
+
+      it "uses api key from env variable DOCKERCLOUD_APIKEY" do
+        ENV['DOCKERCLOUD_APIKEY'] = api_key
+        expect(::DockerCloud::Client).to receive(:new).with(anything, api_key)
+        subject
+      end
+
+    end
+
+    it "uses user name from env variable DOCKERCLOUD_USER" do
+    end
+
+  end
+
 
   describe '#stack_by_name' do
     subject { api.stack_by_name(stack_name_in) }
