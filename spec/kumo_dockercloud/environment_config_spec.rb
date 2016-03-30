@@ -76,7 +76,7 @@ describe KumoDockerCloud::EnvironmentConfig do
 
         context 'when there is a tutum service for the given stack' do
           let(:image_name) { 'redbubble/application-stack-name:1234' }
-          let(:services_for_stack) { [{ 'image_name' => image_name }] }
+          let(:services_for_stack) { [ double(DockerCloud::Service, image_name: image_name) ] }
 
           it 'uses the pre-exisiting image name' do
             expect(subject).to eq image_name
