@@ -92,7 +92,7 @@ module KumoDockerCloud
     end
 
     def exists?
-      result = evaluate_command('docker-cloud stack list')
+      result = evaluate_command('docker-cloud stack ls')
       result.include?(stack_name)
     end
 
