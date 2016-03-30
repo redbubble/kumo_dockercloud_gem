@@ -3,7 +3,6 @@ require 'base64' # left out of DockerCloud gem
 
 module KumoDockerCloud
   class DockerCloudApi
-    # Note: DockerCloud handles the options in a "very" different way.
     def initialize(options = {})
       @client = ::DockerCloud::Client.new(options[:username], options[:api_key])
     end
