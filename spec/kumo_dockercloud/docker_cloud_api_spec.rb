@@ -3,13 +3,13 @@ require 'webmock/rspec'
 
 describe KumoDockerCloud::DockerCloudApi do
   let(:api) { KumoDockerCloud::DockerCloudApi.new(username: 'pebbles', api_key: 'bam bam') }
-  let(:stack) { double('DockerCloud::Stack', name: stack_name, services: services) }
+  let(:stack) { double(DockerCloud::Stack, name: stack_name, services: services) }
   let(:stack_name) { "foo" }
   let(:services) { [] }
 
   describe '#stack_by_name' do
     subject { api.stack_by_name(stack_name_in) }
-    let(:stacks_mock) { double('DockerCloud::StackAPI', all: [stack] ) }
+    let(:stacks_mock) { double(DockerCloud::StackAPI, all: [stack] ) }
 
     before do
       allow_any_instance_of(::DockerCloud::Client).to receive(:stacks).and_return(stacks_mock)
@@ -35,7 +35,7 @@ describe KumoDockerCloud::DockerCloudApi do
 
     context 'when you have no stacks' do
       let(:stack_name_in) { stack_name }
-      let(:stacks_mock) { double('DockerCloud::StackAPI', all: [] ) }
+      let(:stacks_mock) { double(DockerCloud::StackAPI, all: [] ) }
 
       it { should be_nil }
     end
@@ -62,7 +62,7 @@ describe KumoDockerCloud::DockerCloudApi do
       end
 
       context 'with services' do
-        let(:service) { double('DockerCloud::Service') }
+        let(:service) { double(DockerCloud::Service) }
         let(:services) { [ service ] }
         let(:stack_name) { 'bar' }
 
@@ -96,7 +96,7 @@ describe KumoDockerCloud::DockerCloudApi do
     end
 
     context 'with only 1 service' do
-      let(:service) { double('DockerCloud::Service', containers: containers) }
+      let(:service) { double(DockerCloud::Service, containers: containers) }
       let(:services) { [service] }
 
       context 'without any containers' do
@@ -106,7 +106,7 @@ describe KumoDockerCloud::DockerCloudApi do
       end
 
       context 'with multiple containers' do
-        let(:container) { double('DockerCloud::Container') }
+        let(:container) { double(DockerCloud::Container) }
         let(:containers) { [container, container] }
 
         it { should == containers }
@@ -114,11 +114,11 @@ describe KumoDockerCloud::DockerCloudApi do
     end
 
     context 'with multiple services' do
-      let(:service1) { double('DockerCloud::Service', containers: containers1) }
-      let(:service2) { double('DockerCloud::Service', containers: containers2) }
+      let(:service1) { double(DockerCloud::Service, containers: containers1) }
+      let(:service2) { double(DockerCloud::Service, containers: containers2) }
       let(:services) { [service1, service2] }
 
-      let(:container) { double('DockerCloud::Container') }
+      let(:container) { double(DockerCloud::Container) }
       let(:containers1) { [container] }
       let(:containers2) { [container, container] }
 
