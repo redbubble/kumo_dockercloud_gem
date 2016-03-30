@@ -84,8 +84,8 @@ module KumoDockerCloud
     end
 
     def existing_image_name
-      @service_data ||= docker_cloud_api.services_by_stack_name(stack_name).first
-      @service_data ? @service_data['image_name'] : nil
+      @service ||= docker_cloud_api.services_by_stack_name(stack_name).first
+      @service ? @service.image_name : nil
     end
 
     def docker_cloud_api

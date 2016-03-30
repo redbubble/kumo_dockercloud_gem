@@ -91,7 +91,7 @@ describe KumoDockerCloud::EnvironmentConfig do
       end
 
       describe '#image_tag' do
-        let(:services_for_stack) { [{ 'image_name' => image_name }] }
+        let(:services_for_stack) { [ double(DockerCloud::Service, image_name: image_name)] }
 
         subject { instance.image_tag }
 
