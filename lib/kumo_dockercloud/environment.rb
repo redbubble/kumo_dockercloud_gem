@@ -59,15 +59,18 @@ module KumoDockerCloud
 
     def stack_state_provider
       docker_cloud_api = DockerCloudApi.new
-      lambda { docker_cloud_api.stack_by_name(stack_name) }
+      lambda {
+        stack = docker_cloud_api.stack_by_name(stack_name)
+        { name: stack.name, state: stack.state }
+      }
     end
 
     def service_state_provider
       docker_cloud_api = DockerCloudApi.new
       lambda {
         services = docker_cloud_api.services_by_stack_name(stack_name)
-        services.select! { |service| service['name'] != 'geckoboardwidget' }
-        {'name' => 'services', 'state' => services.map { |s| s['state'] }.uniq.join}
+        services.select! { |service| service.name != 'geckoboardwidget' }
+        { name: 'services', state: services.map { |s| s.state }.uniq.join }
       }
     end
 
