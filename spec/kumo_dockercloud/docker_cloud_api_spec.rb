@@ -159,4 +159,16 @@ describe KumoDockerCloud::DockerCloudApi do
       it { should == [container, container, container] }
     end
   end
+
+  context 'forwarded methods' do
+    describe '#services' do
+      let(:client) { instance_double(DockerCloud::Client) }
+      let(:api) { KumoDockerCloud::DockerCloudApi.new(username: username, api_key: api_key, client: client) }
+
+      it 'forwards to the docker cloud client' do
+        expect(client).to receive(:services)
+        api.services
+      end
+    end
+  end
 end
