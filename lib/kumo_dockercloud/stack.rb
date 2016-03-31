@@ -34,7 +34,7 @@ module KumoDockerCloud
     def service_uuid
       @service_uuid ||= begin
         services = docker_cloud_api.services_by_stack_name(stack_name)
-        services.first["uuid"]
+        services.first.uuid
       end
     end
 
