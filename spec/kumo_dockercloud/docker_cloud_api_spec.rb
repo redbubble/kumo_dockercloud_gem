@@ -38,10 +38,6 @@ describe KumoDockerCloud::DockerCloudApi do
       end
 
     end
-
-    it "uses user name from env variable DOCKERCLOUD_USER" do
-    end
-
   end
 
 
@@ -164,4 +160,3 @@ describe KumoDockerCloud::DockerCloudApi do
     end
   end
 end
-
