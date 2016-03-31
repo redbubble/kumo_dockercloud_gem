@@ -35,7 +35,7 @@ Changes to the gem can be manually tested end to end in a project that uses the 
 - First start the dev-tools container: `baxter kumo tools debug non-production`
 - Re-install the gem: `gem specific_install https://github.com/redbubble/kumo_dockercloud_gem.git -b <your_branch>`
 - Fire up a console: `irb`
-- Require the gem: `require "kumo_docker_cloud"`
+- Require the gem: `require "kumo_dockercloud"`
 - Interact with the gem's classes. `KumoDockerCloud::Stack.new('http-wala', 'test').deploy('1518')`
 
 
