@@ -62,14 +62,14 @@ module KumoDockerCloud
     end
 
     def validate_container_data(container)
-      unless container["name"].start_with?(app_name || "asset-wala")
-        puts "Skipping #{container["name"]}"
+      unless container.name.start_with?(app_name || "asset-wala")
+        puts "Skipping #{container.name}"
         return
       end
-      print "Checking '#{container['name']}' (#{container['uuid']}): "
+      print "Checking '#{container.name}' (#{container.uuid}): "
 
-      raise "Unexpected number of open container ports" if container['container_ports'].size != 1
-      endpoint_uri = container['container_ports'].first['endpoint_uri'].gsub(/^tcp:/, 'http:')
+      raise "Unexpected number of open container ports" if container.container_ports.size != 1
+      endpoint_uri = container.container_ports.first['endpoint_uri'].gsub(/^tcp:/, 'http:')
 
       if contactable
         validate_container_version(endpoint_uri)
