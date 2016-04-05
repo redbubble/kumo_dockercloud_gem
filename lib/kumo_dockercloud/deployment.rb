@@ -27,7 +27,11 @@ module KumoDockerCloud
     end
 
     def wait_for_running_state
-      service_state_provider = lambda { docker_cloud_api.services.get(service_uuid) }
+      service_state_provider = lambda {
+        service = docker_cloud_api.services.get(service_uuid)
+        { name: service.name, state: service.state }
+      }
+
       StateValidator.new(service_state_provider).wait_for_state('Running', 240)
     end
 
