@@ -6,8 +6,8 @@ require 'kumo_dockercloud/version'
 Gem::Specification.new do |spec|
   spec.name          = 'kumo_dockercloud'
   spec.version       = KumoDockerCloud::VERSION
-  spec.authors       = %w(Redbubble)
-  spec.email         = %w(developers@redbubble.com)
+  spec.authors       = %w(Redbubble Delivery Engineering)
+  spec.email         = %w(delivery-engineering@redbubble.com)
   spec.summary       = %q{Use to create Redbubble environments on the DockerCloud platform}
   spec.description   = %q{Use to create Redbubble environments on the DockerCloud platform}
   spec.homepage      = ''
@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'httpi', '~> 2.4'
   spec.add_runtime_dependency 'docker_cloud', '~> 0.1'
+  spec.add_runtime_dependency 'kumo_ki', '~>1.0'
 
   spec.add_development_dependency 'bundler', '~> 1.6'
   spec.add_development_dependency 'rake', '~> 10.0'
