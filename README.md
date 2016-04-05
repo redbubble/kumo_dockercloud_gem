@@ -37,6 +37,7 @@ Changes to the gem can be manually tested end to end in a project that uses the 
 - Fire up a console: `irb`
 - Require the gem: `require "kumo_docker_cloud"`
 - Interact with the gem's classes. `KumoDockerCloud::Stack.new('http-wala', 'test').deploy('1518')`
+- If your container doesn't have a version check endpoint, add the `contactable: false` option: `KumoDockerCloud::Stack.new('http-wala', 'test', contactable: false).deploy('1518')`
 
 
 ## Contributing
