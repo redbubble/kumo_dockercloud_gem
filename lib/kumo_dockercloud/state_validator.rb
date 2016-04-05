@@ -17,7 +17,7 @@ module KumoDockerCloud
         @stateful = state_provider.call
 
         if last_state != current_state
-          print "\n#{@stateful.name} is currently #{current_state}"
+          print "\n#{@stateful[:name]} is currently #{current_state}"
         else
           print "."
         end
@@ -41,7 +41,7 @@ module KumoDockerCloud
 
     def current_state
       return 'an unknown state' if @stateful.nil?
-      @stateful.state || 'an unknown state'
+      @stateful.fetch(:state, 'an unknown state')
     end
 
   end
