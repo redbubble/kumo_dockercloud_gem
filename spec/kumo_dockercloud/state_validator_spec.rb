@@ -6,7 +6,7 @@ describe KumoDockerCloud::StateValidator do
     subject { state_validator.wait_for_state('done', 1) }
     let(:state_validator) { described_class.new(state_provider) }
     let(:state_provider) { double('state_provider', call: service) }
-    let(:service) { { state: service_state, name: 'service name' } }
+    let(:service) { {state: service_state, name: 'service name'} }
 
     context 'the right state' do
       let(:service_state) { 'done' }
@@ -30,7 +30,7 @@ describe KumoDockerCloud::StateValidator do
     subject { state_validator.wait_for_exit_state(1) }
     let(:state_validator) { described_class.new(state_provider) }
     let(:state_provider) { double('state_provider', call: service) }
-    let(:service) { { name: 'service name', exit_code: exit_code } }
+    let(:service) { {name: 'service name', exit_code: exit_code} }
 
     context 'success' do
       let(:exit_code) { 0 }
