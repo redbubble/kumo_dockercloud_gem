@@ -59,9 +59,16 @@ module KumoDockerCloud
       end
 
       print "\n"
+
       if current_exit_code.nil?
         puts "Timed out after #{time_limit} seconds"
         raise TimeoutError.new
+      end
+
+      if current_exit_code != 0
+        error_message = "Deployment failed with exit code #{current_exit_code}"
+        puts error_message
+        raise error_message
       end
     end
 

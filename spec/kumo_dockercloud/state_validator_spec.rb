@@ -40,10 +40,18 @@ describe KumoDockerCloud::StateValidator do
       end
     end
 
+    context 'failure' do
+      let(:exit_code) { 1 }
+
+      it 'raises an exception' do
+        expect { subject }.to raise_error("Deployment failed with exit code 1")
+      end
+    end
+
     context 'no exit before the timeout' do
       let(:exit_code) { nil }
 
-      it 'fails' do
+      it 'raises an exception' do
         expect { subject }.to raise_error(Timeout::Error)
       end
     end
