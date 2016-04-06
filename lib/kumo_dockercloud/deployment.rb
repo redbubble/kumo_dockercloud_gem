@@ -35,6 +35,15 @@ module KumoDockerCloud
       StateValidator.new(service_state_provider).wait_for_state('Running', 240)
     end
 
+    def wait_for_exit_state
+      exit_state_provider = lambda {
+        service = docker_cloud_api.services.get(service_uuid)
+        { name: service.name, exit_code: service.containers.first.exit_code }
+      }
+
+      StateValidator.new(exit_state_provider).wait_for_exit_state(240)
+    end
+
     private
 
     def service_uuid
@@ -120,7 +129,7 @@ module KumoDockerCloud
         raise e
       else
         retry
-      end 
+      end
     end
   end
 end
