@@ -14,7 +14,7 @@ describe KumoDockerCloud::Stack do
     let(:stacks) { double('stacks', all: [stack]) }
     let(:stack) { instance_double(DockerCloud::Stack, name: "#{app_name}-#{environment_name}", services: [service]) }
     let(:service) { instance_double(DockerCloud::Service, uuid: uuid, name: service_name, containers: []) }
-    let(:state_validator) { instance_double(KumoDockerCloud::StateValidator, wait_for_state: nil) }
+    let(:state_validator) { instance_double(KumoDockerCloud::StateValidator) }
 
     before do
       allow(::DockerCloud::Client).to receive(:new).and_return(client)
@@ -24,6 +24,7 @@ describe KumoDockerCloud::Stack do
     it 'uses the service api to update the image and redeploy' do
       expect(service_api).to receive(:update).with(uuid, {image: "redbubble/#{app_name}:#{app_version}"})
       expect(service_api).to receive(:redeploy).with(uuid)
+      expect(state_validator).to receive(:wait_for_state).and_return(nil)
       subject
     end
   end
