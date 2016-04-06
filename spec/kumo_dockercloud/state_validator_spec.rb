@@ -44,7 +44,7 @@ describe KumoDockerCloud::StateValidator do
       let(:exit_code) { 1 }
 
       it 'raises an exception' do
-        expect { subject }.to raise_error("Deployment failed with exit code 1")
+        expect { subject }.to raise_error("service name deployment failed with exit code 1")
       end
     end
 
