@@ -2,8 +2,9 @@ require 'spec_helper'
 
 describe KumoDockerCloud::Stack do
   describe '#deploy' do
-    subject { described_class.new(app_name, environment_name).deploy(app_version) }
+    subject { described_class.new(app_name, environment_name).deploy(service_name, app_version) }
 
+    let(:service_name) { 'test_service' }
     let(:app_name) { 'test_app' }
     let(:environment_name) { 'environment' }
     let(:app_version) { '1' }
@@ -12,7 +13,7 @@ describe KumoDockerCloud::Stack do
     let(:service_api) { instance_double(DockerCloud::ServiceAPI) }
     let(:stacks) { double('stacks', all: [stack]) }
     let(:stack) { instance_double(DockerCloud::Stack, name: "#{app_name}-#{environment_name}", services: [service]) }
-    let(:service) { instance_double(DockerCloud::Service, uuid: uuid, containers: []) }
+    let(:service) { instance_double(DockerCloud::Service, uuid: uuid, name: service_name, containers: []) }
     let(:state_validator) { instance_double(KumoDockerCloud::StateValidator, wait_for_state: nil) }
 
     before do

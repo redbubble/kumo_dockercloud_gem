@@ -22,6 +22,11 @@ module KumoDockerCloud
       stack.services
     end
 
+    def service_by_stack_and_service_name(stack_name, service_name)
+      services = services_by_stack_name(stack_name)
+      services.find { |s| s.name == service_name }
+    end
+
     def containers_by_stack_name(stack_name)
       services_by_stack_name(stack_name).collect do |service|
         service.containers

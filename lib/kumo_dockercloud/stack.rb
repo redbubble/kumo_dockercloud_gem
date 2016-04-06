@@ -8,7 +8,8 @@ module KumoDockerCloud
       @options = options
     end
 
-    def deploy(version)
+    def deploy(service_name, version)
+      @service_uuid = service_uuid(service_name)
       update_image(version)
       redeploy
       validate_deployment(version)
@@ -17,11 +18,11 @@ module KumoDockerCloud
     private
 
     def update_image(version)
-      docker_cloud_api.services.update(service_uuid, image: "redbubble/#{app_name}:#{version}")
+      docker_cloud_api.services.update(@service_uuid, image: "redbubble/#{app_name}:#{version}")
     end
 
     def redeploy
-      docker_cloud_api.services.redeploy(service_uuid)
+      docker_cloud_api.services.redeploy(@service_uuid)
     end
 
     def validate_deployment(version)
@@ -31,11 +32,8 @@ module KumoDockerCloud
       deployment.validate
     end
 
-    def service_uuid
-      @service_uuid ||= begin
-        services = docker_cloud_api.services_by_stack_name(stack_name)
-        services.first.uuid
-      end
+    def service_uuid(service_name)
+      docker_cloud_api.service_by_stack_and_service_name(stack_name, service_name).uuid
     end
 
     def docker_cloud_api
