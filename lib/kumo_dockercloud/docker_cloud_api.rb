@@ -9,7 +9,8 @@ module KumoDockerCloud
     def initialize(options = {})
       options[:username] ||= ENV['DOCKERCLOUD_USER']
       options[:api_key] ||= ENV['DOCKERCLOUD_APIKEY']
-      @client = options[:client] || ::DockerCloud::Client.new(options[:username], options[:api_key])
+
+      @client = options[:client] || ::DockerCloud::Client.new(options.fetch(:username), options.fetch(:api_key))
     end
 
     def stack_by_name(name)
