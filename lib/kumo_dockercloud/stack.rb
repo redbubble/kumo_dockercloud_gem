@@ -24,10 +24,6 @@ module KumoDockerCloud
 
     private
 
-    def update_image(version)
-      docker_cloud_api.services.update(@service_uuid, image: "redbubble/#{app_name}:#{version}")
-    end
-
     def redeploy
       docker_cloud_api.services.redeploy(@service_uuid)
     end
@@ -50,9 +46,7 @@ module KumoDockerCloud
       docker_cloud_api.service_by_stack_and_service_name(stack_name, service_name).uuid
     end
 
-    def docker_cloud_api
-      @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
-    end
+
 
   end
 end
