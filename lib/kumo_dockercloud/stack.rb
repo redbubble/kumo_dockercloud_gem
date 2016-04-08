@@ -42,9 +42,6 @@ module KumoDockerCloud
       deployment.wait_for_exit_state
     end
 
-    def service_uuid(service_name)
-      docker_cloud_api.service_by_stack_and_service_name(stack_name, service_name).uuid
-    end
 
 
 

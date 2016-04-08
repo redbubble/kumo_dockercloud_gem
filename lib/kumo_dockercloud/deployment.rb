@@ -46,9 +46,9 @@ module KumoDockerCloud
 
     private
 
-    def service_uuid
+    def service_uuid(service_name)
       @service_uuid ||= begin
-        services = docker_cloud_api.services_by_stack_name(stack_name)
+        services = docker_cloud_api.service_by_stack_and_service_name(stack_name, service_name)
         services.first.uuid
       end
     end
