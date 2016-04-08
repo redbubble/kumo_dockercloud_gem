@@ -9,9 +9,10 @@ module KumoDockerCloud
     end
 
     def deploy(service_name, version)
-      @service_uuid = service_uuid(service_name)
-      update_image(version)
-      redeploy
+      # @service_uuid = service_uuid(service_name)
+      service = Service.new(stack_name, service_name)
+      service.update_image(version)
+      service.redeploy
       validate_deployment(version)
     end
 
@@ -24,9 +25,7 @@ module KumoDockerCloud
 
     private
 
-    def redeploy
-      docker_cloud_api.services.redeploy(@service_uuid)
-    end
+
 
     def validate_deployment(version)
       deployment = Deployment.new(stack_name, version)

@@ -3,9 +3,9 @@ require 'spec_helper'
 describe KumoDockerCloud::Service do
   let(:service_api) { instance_double(DockerCloud::ServiceAPI) }
   let(:docker_cloud_api) { instance_double(KumoDockerCloud::DockerCloudApi, services: service_api) }
-  let(:api_service) { instance_double(DockerCloud::Service, uuid: 'service_uuid') }
+  let(:api_service) { instance_double(DockerCloud::Service, uuid: 'service_uuid', image_name: 'repository/docker_image_name:latest') }
 
-  subject { described_class.new('stack_name', 'service_name', 'repository/docker_image_name') }
+  subject { described_class.new('stack_name', 'service_name') }
 
   before do
     allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return(docker_cloud_api)
