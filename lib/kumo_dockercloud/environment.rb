@@ -8,6 +8,7 @@ require_relative 'state_validator'
 require_relative 'environment_config'
 require_relative 'stack_file'
 
+#TODO refactor this to use the new checker inside Service
 module KumoDockerCloud
   class Environment
     extend ::Forwardable
