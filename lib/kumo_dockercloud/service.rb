@@ -12,7 +12,7 @@ module KumoDockerCloud
       redeploy
     end
 
-    def check(checks, timeout=300)
+    def check(checks, timeout)
       Timeout::timeout(timeout) do
         all_tests_passed = true
 
@@ -26,8 +26,8 @@ module KumoDockerCloud
 
         unless all_tests_passed
           print '.'
-          sleep(1)
-          check(checks)
+          sleep(5)
+          check(checks, timeout)
         end
 
         true

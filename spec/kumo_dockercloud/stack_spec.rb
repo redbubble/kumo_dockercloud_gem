@@ -12,6 +12,7 @@ describe KumoDockerCloud::Stack do
   let(:stack_name) { "#{app_name}-#{environment_name}" }
   let(:stack) { instance_double(DockerCloud::Stack, name: stack_name) }
   let(:service) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
+  let(:check_timeout) { 300 }
 
   before do
     allow(::DockerCloud::Client).to receive(:new).and_return(client)
@@ -46,8 +47,17 @@ describe KumoDockerCloud::Stack do
     it 'passes any checks to the checker' do
       checks = ["check1", "check2"]
       allow(service).to receive(:deploy).with("test_version")
-      expect(service).to receive(:check).with(checks)
+      expect(service).to receive(:check).with(checks, check_timeout)
       subject.deploy('test_service', 'test_version', checks)
     end
+
+    it 'passes any specific timeout to the checker' do
+      checks = ["check1", "check2"]
+      shortened_timeout = 10
+      allow(service).to receive(:deploy).with("test_version")
+      expect(service).to receive(:check).with(checks, shortened_timeout)
+      subject.deploy('test_service', 'test_version', checks, shortened_timeout)
+    end
+
   end
 end

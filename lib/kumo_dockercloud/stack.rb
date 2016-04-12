@@ -8,13 +8,13 @@ module KumoDockerCloud
       @options = options
     end
 
-    def deploy(service_name, version, checks = nil)
+    def deploy(service_name, version, checks = nil, check_timeout = 300)
       validate_params(service_name, 'Service name')
       validate_params(version, 'Version')
 
       service = Service.new(stack_name, service_name)
       service.deploy(version)
-      service.check(checks) if checks
+      service.check(checks, check_timeout) if checks
     end
 
     private
