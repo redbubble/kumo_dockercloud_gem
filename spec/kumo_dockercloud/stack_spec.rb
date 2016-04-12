@@ -5,7 +5,6 @@ describe KumoDockerCloud::Stack do
   let(:uuid) { 'foo' }
   let(:service_name) { 'test_service' }
   let(:app_name) { 'test_app' }
-  let(:image_name) { "repository/#{app_name}"}
   let(:environment_name) { 'environment' }
   let(:app_version) { '1' }
   let(:client) { instance_double(DockerCloud::Client, stacks: stacks, services: service_api) }
@@ -13,41 +12,42 @@ describe KumoDockerCloud::Stack do
   let(:stack_name) { "#{app_name}-#{environment_name}" }
   let(:stack) { instance_double(DockerCloud::Stack, name: stack_name) }
   let(:service) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
-  let(:state_validator) { instance_double(KumoDockerCloud::StateValidator) }
 
   before do
     allow(::DockerCloud::Client).to receive(:new).and_return(client)
-    allow(KumoDockerCloud::StateValidator).to receive(:new).and_return(state_validator)
     allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name).and_return(service)
-
+    allow(service).to receive(:deploy).with("test_version")
   end
 
   describe '#deploy' do
-    subject { described_class.new(app_name, environment_name).deploy(service_name, app_version) }
+    subject { described_class.new(app_name, environment_name) }
 
-    it 'uses the service api to update the image and redeploy' do
-      expect(service).to receive(:update_image).with(app_version)
-      expect(service).to receive(:redeploy)
-      expect(state_validator).to receive(:wait_for_state).and_return(nil)
-      subject
-    end
-  end
-
-  describe '#deploy_wait_for_exit' do
-    subject { described_class.new(app_name, environment_name).deploy_wait_for_exit(service_name, app_version) }
-    let(:deployment) { instance_double(KumoDockerCloud::Deployment) }
-
-    before do
-      allow(KumoDockerCloud::Deployment).to receive(:new).and_return(deployment)
-      allow(deployment).to receive(:app_name=)
-      allow(deployment).to receive(:contactable=)
+    it 'complains if passed a nil service name' do
+      expect { subject.deploy(nil, 1) }.to raise_error(KumoDockerCloud::Error, 'Service name cannot be nil')
     end
 
-    it 'uses the service api to update the image and redeploy' do
-      expect(service_api).to receive(:update).with(uuid, {image: "redbubble/#{app_name}:#{app_version}"})
-      expect(service_api).to receive(:redeploy).with(uuid)
-      expect(deployment).to receive(:wait_for_exit_state)
-      subject
+    it 'complains if passed an empty service name' do
+      expect { subject.deploy("", 1) }.to raise_error(KumoDockerCloud::Error, 'Service name cannot be empty')
+    end
+
+    it 'complains if passed a nil version' do
+      expect { subject.deploy("test_service", nil) }.to raise_error(KumoDockerCloud::Error, 'Version cannot be nil')
+    end
+
+    it 'complains if passed an empty version' do
+      expect { subject.deploy("test_service", "") }.to raise_error(KumoDockerCloud::Error, 'Version cannot be empty')
+    end
+
+    it 'deploys the version of my service' do
+      expect(service).to receive(:deploy).with("test_version")
+      subject.deploy('test_service', 'test_version')
+    end
+
+    it 'passes any checks to the checker' do
+      checks = ["check1", "check2"]
+      allow(service).to receive(:deploy).with("test_version")
+      expect(service).to receive(:check).with(checks)
+      subject.deploy('test_service', 'test_version', checks)
     end
   end
 end

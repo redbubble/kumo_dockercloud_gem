@@ -9,7 +9,7 @@ describe KumoDockerCloud::Deployment do
     let(:docker_cloud_api_services) { double("services") }
 
 
-    it 'checks the exit state of the container that belongs to the named service' do
+    pending 'checks the exit state of the container that belongs to the named service' do
       allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return(docker_cloud_api)
       expect(docker_cloud_api_services).to receive(:get).with('correct uuid')
       expect(docker_cloud_api).to receive(:service_by_stack_and_service_name).with('test_stack', 'correct_service')

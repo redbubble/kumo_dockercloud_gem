@@ -1,3 +1,5 @@
+require 'timeout'
+
 module KumoDockerCloud
   class Service
     def initialize(stack_name, service_name)
@@ -5,16 +7,54 @@ module KumoDockerCloud
       @name = service_name
     end
 
-    def update_image(version)
-      docker_cloud_api.services.update(uuid, image: "#{image_name}:#{version}")
+    def deploy(version)
+      update_image(version)
+      redeploy
     end
 
-    def redeploy
-      docker_cloud_api.services.redeploy(uuid)
+    def check(checks, timeout=300)
+      Timeout::timeout(timeout) do
+        all_tests_passed = true
+
+        containers.each do |container|
+          checks.each do |check|
+            unless check.call(container)
+              all_tests_passed = false
+            end
+          end
+        end
+
+        unless all_tests_passed
+          print '.'
+          sleep(1)
+          check(checks)
+        end
+
+        true
+      end
+    rescue
+      raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
     end
 
     private
     attr_reader :stack_name, :name
+
+
+    def containers
+      service_api.containers
+    end
+
+    def update_image(version)
+      docker_cloud_api.services.update(uuid, image: "#{image_name}:#{version}")
+    rescue RestClient::InternalServerError
+      raise KumoDockerCloud::ServiceDeployError.new("Something went wrong during service update on Docker Cloud's end")
+    end
+
+    def redeploy
+      docker_cloud_api.services.redeploy(uuid)
+    rescue RestClient::InternalServerError
+      raise KumoDockerCloud::ServiceDeployError.new("Something went wrong during service update on Docker Cloud's end")
+    end
 
     def docker_cloud_api
       @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
