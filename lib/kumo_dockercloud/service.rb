@@ -17,6 +17,7 @@ module KumoDockerCloud
         all_tests_passed = true
         service_api.reload
         containers.each do |container|
+          container.reload
           checks.each do |check|
             unless check.call(container)
               all_tests_passed = false
