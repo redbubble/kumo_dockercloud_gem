@@ -53,7 +53,6 @@ describe KumoDockerCloud::Service do
     before do
       allow(http_lib).to receive(:get).with("http://whale1.test/site_status").and_return(200)
       allow(http_lib).to receive(:get).with("http://whale2.test/site_status").and_return("timeout", "timeout", 200)
-      allow(docker_cloud_service_api).to receive(:reload)
       allow(whale1).to receive(:state).and_return("Starting", "Running")
       allow(docker_cloud_service_api).to receive(:containers).and_return(containers)
     end
@@ -68,19 +67,6 @@ describe KumoDockerCloud::Service do
       short_timeout = 2
       allow(whale1).to receive(:state).and_return("Starting")
       expect { subject.check(checks, short_timeout) }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout")
-    end
-
-    it 'reloads the service object once for every check run' do
-      allow(subject).to receive(:sleep).and_return(nil)
-      expect(docker_cloud_service_api).to receive(:reload).exactly(3).times
-      subject.check(checks, check_timeout)
-    end
-
-    it 'reloads the container object once for every check run' do
-      allow(subject).to receive(:sleep).and_return(nil)
-      expect(whale1).to receive(:reload).exactly(3).times
-      expect(whale2).to receive(:reload).exactly(3).times
-      subject.check(checks, check_timeout)
     end
   end
 end

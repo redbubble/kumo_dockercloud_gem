@@ -15,9 +15,7 @@ module KumoDockerCloud
     def check(checks, timeout)
       Timeout::timeout(timeout) do
         all_tests_passed = true
-        service_api.reload
         containers.each do |container|
-          container.reload
           checks.each do |check|
             unless check.call(container)
               all_tests_passed = false
@@ -40,7 +38,6 @@ module KumoDockerCloud
     private
     attr_reader :stack_name, :name
 
-
     def containers
       service_api.containers
     end
@@ -62,7 +59,7 @@ module KumoDockerCloud
     end
 
     def service_api
-      @service_api ||= docker_cloud_api.service_by_stack_and_service_name(stack_name, name)
+      docker_cloud_api.service_by_stack_and_service_name(stack_name, name)
     end
 
     def uuid
@@ -72,6 +69,5 @@ module KumoDockerCloud
     def image_name
       service_api.image_name.split(':').first
     end
-
   end
 end
