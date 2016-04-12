@@ -37,11 +37,45 @@ module KumoDockerCloud
       end
     end
 
+    def wait_for_exit_state(time_limit)
+      start_time = Time.now
+
+      while Time.now.to_i - start_time.to_i < time_limit
+        @stateful = state_provider.call
+
+        print "."
+
+        unless current_exit_code.nil?
+          break
+        end
+
+        sleep(1)
+      end
+
+      print "\n"
+
+      if current_exit_code.nil?
+        puts "#{@stateful[:name]} deployment timed out after #{time_limit} seconds"
+        raise TimeoutError.new
+      end
+
+      if current_exit_code != 0
+        error_message = "#{@stateful[:name]} deployment failed with exit code #{current_exit_code}"
+        puts error_message
+        raise error_message
+      end
+    end
+
     private
 
     def current_state
       return 'an unknown state' if @stateful.nil?
       @stateful.fetch(:state, 'an unknown state')
+    end
+
+    def current_exit_code
+      return 'an unknown state' if @stateful.nil?
+      @stateful.fetch(:exit_code, nil)
     end
 
   end
