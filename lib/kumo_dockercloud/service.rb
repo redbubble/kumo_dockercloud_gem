@@ -15,7 +15,7 @@ module KumoDockerCloud
     def check(checks, timeout)
       Timeout::timeout(timeout) do
         all_tests_passed = true
-
+        service_api.reload
         containers.each do |container|
           checks.each do |check|
             unless check.call(container)
