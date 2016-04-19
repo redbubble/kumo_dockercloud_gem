@@ -51,6 +51,14 @@ module KumoDockerCloud
       image_name.split(':').last
     end
 
+    def rails_env(name)
+      if %w(development test cucumber demo staging production).include?(name)
+        name
+      else
+        'demo'
+      end
+    end
+
     def plain_text_secrets
       @plain_text_secrets ||= Hash[
         encrypted_secrets.map do |name, cipher_text|
