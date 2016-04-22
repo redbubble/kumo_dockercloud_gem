@@ -60,4 +60,35 @@ describe KumoDockerCloud::Stack do
     end
 
   end
+
+  describe '#deploy_blue_green' do
+    let(:redbubble_a_uuid) { 'redbubble_a_uuid' }
+    let(:redbubble_a) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
+    let(:redbubble_b_uuid) { 'redbubble_b_uuid' }
+    let(:redbubble_b) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
+    let(:nginx) { instance_double(KumoDockerCloud::Service, uuid: "nginx_uuid") }
+    let(:version) { "1" }
+    let(:db_migrations_checks) { [] }
+
+    subject { described_class.new(app_name, environment_name).deploy_blue_green(service_names: ["redbubble-a", "redbubble-b"], version: version, checks: db_migrations_checks, timeout: 120, switching_service_name: "nginx") }
+
+    before do
+      allow(KumoDockerCloud::Service).to receive(:new)
+        .with(stack_name, "redbubble-b")
+        .and_return(redbubble_b)
+
+      allow(KumoDockerCloud::Service).to receive(:new)
+        .with(stack_name, "nginx")
+        .and_return(nginx)
+    end
+
+    it 'deploys to the blue service only' do
+      expect(redbubble_b).to receive(:deploy).with(version)
+      expect(redbubble_a).to_not receive(:deploy)
+      subject
+    end
+
+    it 'switches over to the blue service'
+    it 'shuts down the previously green service'
+  end
 end

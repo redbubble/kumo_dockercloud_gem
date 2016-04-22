@@ -35,6 +35,9 @@ module KumoDockerCloud
       raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
     end
 
+    def links
+    end
+
     private
     attr_reader :stack_name, :name
 
