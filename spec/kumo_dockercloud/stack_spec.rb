@@ -105,6 +105,23 @@ describe KumoDockerCloud::Stack do
       allow(service_b).to receive(:check).with(deployment_checks, check_timeout)
     end
 
+    context 'when parameters are missing' do
+      it 'blow up when version is missing' do
+        deploy_options.delete(:version)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Version cannot be nil")
+      end
+
+      it 'blow up when service_names are missing' do
+        deploy_options.delete(:service_names)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Service names cannot be nil")
+      end
+
+      it 'blow up when switching_service_name is missing' do
+        deploy_options.delete(:switching_service_name)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Switching service name cannot be nil")
+      end
+    end
+
     it 'deploys to the blue service only' do
       expect(service_b).to receive(:deploy).with(version)
       expect(service_b).to receive(:check).with(deployment_checks, check_timeout)
