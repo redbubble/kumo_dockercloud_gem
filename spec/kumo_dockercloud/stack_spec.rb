@@ -62,33 +62,64 @@ describe KumoDockerCloud::Stack do
   end
 
   describe '#deploy_blue_green' do
-    let(:redbubble_a_uuid) { 'redbubble_a_uuid' }
-    let(:redbubble_a) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
-    let(:redbubble_b_uuid) { 'redbubble_b_uuid' }
-    let(:redbubble_b) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
+    let(:service_a_uuid) { 'service_a_uuid' }
+    let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, uuid: uuid, name: "service-a") }
+    let(:service_b_uuid) { 'service_b_uuid' }
+    let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, uuid: uuid, name: "service-b") }
     let(:nginx) { instance_double(KumoDockerCloud::Service, uuid: "nginx_uuid") }
     let(:version) { "1" }
-    let(:db_migrations_checks) { [] }
+    let(:deployment_checks) { [] }
+    let(:links) { [service_a] }
+    let(:check_timeout) { 120 }
+    let(:deploy_options) do
+      {
+        service_names: ["service-a", "service-b"],
+        version: version,
+        checks: deployment_checks,
+        check_timeout: check_timeout,
+        switching_service_name: "nginx"
+      }
+    end
 
-    subject { described_class.new(app_name, environment_name).deploy_blue_green(service_names: ["redbubble-a", "redbubble-b"], version: version, checks: db_migrations_checks, timeout: 120, switching_service_name: "nginx") }
+    subject { described_class.new(app_name, environment_name).deploy_blue_green(deploy_options) }
 
     before do
       allow(KumoDockerCloud::Service).to receive(:new)
-        .with(stack_name, "redbubble-b")
-        .and_return(redbubble_b)
+        .with(stack_name, "service-a")
+        .and_return(service_a)
+
+      allow(KumoDockerCloud::Service).to receive(:new)
+        .with(stack_name, "service-b")
+        .and_return(service_b)
 
       allow(KumoDockerCloud::Service).to receive(:new)
         .with(stack_name, "nginx")
         .and_return(nginx)
+
+      allow(nginx).to receive(:links).and_return(links)
+      allow(nginx).to receive(:set_link).with(service_b)
+
+      allow(service_a).to receive(:stop)
+
+      allow(service_b).to receive(:deploy).with(version)
+      allow(service_b).to receive(:check).with(deployment_checks, check_timeout)
     end
 
     it 'deploys to the blue service only' do
-      expect(redbubble_b).to receive(:deploy).with(version)
-      expect(redbubble_a).to_not receive(:deploy)
+      expect(service_b).to receive(:deploy).with(version)
+      expect(service_b).to receive(:check).with(deployment_checks, check_timeout)
+      expect(service_a).to_not receive(:deploy)
       subject
     end
 
-    it 'switches over to the blue service'
-    it 'shuts down the previously green service'
+    it 'switches over to the blue service on a successful deployment' do
+      expect(nginx).to receive(:set_link).with(service_b)
+      subject
+    end
+
+    it 'shuts down the previously green service' do
+      expect(service_a).to receive(:stop)
+      subject
+    end
   end
 end

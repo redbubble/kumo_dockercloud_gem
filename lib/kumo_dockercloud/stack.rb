@@ -2,6 +2,7 @@ module KumoDockerCloud
   class Stack
     attr_reader :stack_name, :app_name, :options
 
+    #TODO delete options
     def initialize(app_name, env_name, options = { contactable: true })
       @app_name = app_name
       @stack_name = "#{app_name}-#{env_name}"
@@ -18,17 +19,19 @@ module KumoDockerCloud
     end
 
     def deploy_blue_green(options)
-      service_names = options[:service_names]
       version = options[:version]
       checks = options[:checks]
-      timeout = options[:timeout]
+      check_timeout = options[:check_timeout]
       switching_service_name = options[:switching_service_name]
+      services = options[:service_names].map { |service_name| Service.new(stack_name, service_name) }
 
       switching_service = Service.new(stack_name, switching_service_name)
-      green_service_name = switching_service.links.find { |service| service_names.include?(service.name) }
-      blue_service_name = service_names.reject { |service| service.name == green_service_name }
+      green_service = switching_service.links.find { |linked_service| services.find { |service| service.name == linked_service.name } }
+      blue_service = services.find { |service| service.name != green_service.name }
 
-      Service.new(stack_name, blue_service_name).deploy(version, checks, timeout)
+      deploy(blue_service.name, version, checks, check_timeout)
+      switching_service.set_link(blue_service)
+      green_service.stop
     end
 
     private

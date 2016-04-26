@@ -2,6 +2,8 @@ require 'timeout'
 
 module KumoDockerCloud
   class Service
+    attr_reader :name
+
     def initialize(stack_name, service_name)
       @stack_name = stack_name
       @name = service_name
@@ -38,8 +40,14 @@ module KumoDockerCloud
     def links
     end
 
+    def set_link(link)
+    end
+
+    def stop
+    end
+
     private
-    attr_reader :stack_name, :name
+    attr_reader :stack_name
 
     def containers
       service_api.containers
