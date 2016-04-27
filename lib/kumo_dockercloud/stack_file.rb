@@ -9,6 +9,7 @@ module KumoDockerCloud
 
       env_vars.each do |key, _|
         key_string = key.to_s
+        parsed[key_string]['environment'] ||= {}
         parsed[key_string]['environment'].merge!(converted_env_vars.fetch(key_string))
       end
 
