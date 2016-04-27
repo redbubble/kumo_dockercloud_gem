@@ -60,4 +60,83 @@ describe KumoDockerCloud::Stack do
     end
 
   end
+
+  describe '#deploy_blue_green' do
+    let(:service_a_uuid) { 'service_a_uuid' }
+    let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, uuid: uuid, name: "service-a") }
+    let(:service_b_uuid) { 'service_b_uuid' }
+    let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, uuid: uuid, name: "service-b") }
+    let(:nginx) { instance_double(KumoDockerCloud::Service, uuid: "nginx_uuid") }
+    let(:version) { "1" }
+    let(:deployment_checks) { [] }
+    let(:links) { [service_a] }
+    let(:check_timeout) { 120 }
+    let(:deploy_options) do
+      {
+        service_names: ["service-a", "service-b"],
+        version: version,
+        checks: deployment_checks,
+        check_timeout: check_timeout,
+        switching_service_name: "nginx"
+      }
+    end
+
+    subject { described_class.new(app_name, environment_name).deploy_blue_green(deploy_options) }
+
+    before do
+      allow(KumoDockerCloud::Service).to receive(:new)
+        .with(stack_name, "service-a")
+        .and_return(service_a)
+
+      allow(KumoDockerCloud::Service).to receive(:new)
+        .with(stack_name, "service-b")
+        .and_return(service_b)
+
+      allow(KumoDockerCloud::Service).to receive(:new)
+        .with(stack_name, "nginx")
+        .and_return(nginx)
+
+      allow(nginx).to receive(:links).and_return(links)
+      allow(nginx).to receive(:set_link).with(service_b)
+
+      allow(service_a).to receive(:stop)
+
+      allow(service_b).to receive(:deploy).with(version)
+      allow(service_b).to receive(:check).with(deployment_checks, check_timeout)
+    end
+
+    context 'when parameters are missing' do
+      it 'blow up when version is missing' do
+        deploy_options.delete(:version)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Version cannot be nil")
+      end
+
+      it 'blow up when service_names are missing' do
+        deploy_options.delete(:service_names)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Service names cannot be nil")
+      end
+
+      it 'blow up when switching_service_name is missing' do
+        deploy_options.delete(:switching_service_name)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Switching service name cannot be nil")
+      end
+    end
+
+    it 'deploys to the blue service only' do
+      expect(service_b).to receive(:deploy).with(version)
+      expect(service_b).to receive(:check).with(deployment_checks, check_timeout)
+      expect(service_a).to_not receive(:deploy)
+      subject
+    end
+
+    it 'switches over to the blue service on a successful deployment' do
+      expect(nginx).to receive(:set_link).with(service_b)
+      subject
+    end
+
+    it 'shuts down the previously green service' do
+      expect(service_a).to receive(:stop)
+      subject
+    end
+  end
 end

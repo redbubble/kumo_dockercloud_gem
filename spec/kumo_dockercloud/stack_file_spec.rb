@@ -32,8 +32,6 @@ describe KumoDockerCloud::StackFile do
       expect(subject).to eq(app_name => {
         'image' => 'a-thing',
         'environment' => {
-          'TEST_ENV' => 'FAKE',
-          'MORE' => 'ANOTHER',
           'KEY' => 'VALUE'
         }
       })
@@ -53,8 +51,6 @@ describe KumoDockerCloud::StackFile do
           'image' => 'a-thing',
           'environment' => {
             'TEST' => 'thing',
-            'TEST_ENV' => 'FAKE',
-            'MORE' => 'ANOTHER',
             'KEY' => 'VALUE'
           }
         })
@@ -72,32 +68,7 @@ describe KumoDockerCloud::StackFile do
         expect(subject).to eq(app_name => {
           'image' => 'a-thing',
           'environment' => {
-            'TEST_ENV' => 'FAKE',
-            'MORE' => 'ANOTHER',
             'KEY' => 'VALUE'
-          }
-        })
-      end
-    end
-
-    context 'no app name env var' do
-      let(:env_vars) do
-        { }
-      end
-
-      let(:stack_template) do
-        <<-eos
-          application-stack-name:
-            image: a-thing
-        eos
-      end
-
-      it 'should create the environment with secrets in it' do
-        expect(subject).to eq(app_name => {
-          'image' => 'a-thing',
-          'environment' => {
-            'TEST_ENV' => 'FAKE',
-            'MORE' => 'ANOTHER'
           }
         })
       end
@@ -130,8 +101,6 @@ describe KumoDockerCloud::StackFile do
           app_name => {
             'image' => 'a-thing',
             'environment' => {
-              'TEST_ENV' => 'FAKE',
-              'MORE' => 'ANOTHER',
               'KEY' => 'VALUE'
             }},
           'another_service' => {

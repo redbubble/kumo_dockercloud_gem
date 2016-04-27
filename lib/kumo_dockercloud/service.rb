@@ -2,6 +2,8 @@ require 'timeout'
 
 module KumoDockerCloud
   class Service
+    attr_reader :name
+
     def initialize(stack_name, service_name)
       @stack_name = stack_name
       @name = service_name
@@ -35,11 +37,33 @@ module KumoDockerCloud
       raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
     end
 
+    def links
+      get_service.linked_to_service.map { |service| KumoDockerCloud::Service.new(stack_name, service[:name]) }
+    end
+
+    def set_link(service_to_link)
+      linked_service = {
+        to_service: service_to_link.resource_uri,
+        name: service_to_link.name,
+        from_service: resource_uri
+      }
+
+      docker_cloud_api.services.update(uuid, linked_to_service: [linked_service])
+    end
+
+    def stop
+      docker_cloud_api.services.stop(uuid)
+    end
+
+    def resource_uri
+      get_service.resource_uri
+    end
+
     private
-    attr_reader :stack_name, :name
+    attr_reader :stack_name
 
     def containers
-      service_api.containers
+      get_service.containers
     end
 
     def update_image(version)
@@ -58,16 +82,16 @@ module KumoDockerCloud
       @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
     end
 
-    def service_api
+    def get_service
       docker_cloud_api.service_by_stack_and_service_name(stack_name, name)
     end
 
     def uuid
-      service_api.uuid
+      get_service.uuid
     end
 
     def image_name
-      service_api.image_name.split(':').first
+      get_service.image_name.split(':').first
     end
   end
 end
