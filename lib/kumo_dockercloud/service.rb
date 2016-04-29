@@ -14,27 +14,6 @@ module KumoDockerCloud
       redeploy
     end
 
-    def check(checks, timeout)
-      Timeout::timeout(timeout) do
-        all_tests_passed = true
-        containers.each do |container|
-          checks.each do |check|
-            unless check.call(container)
-              all_tests_passed = false
-            end
-          end
-        end
-
-        unless all_tests_passed
-          print '.'
-          sleep(5)
-          check(checks, timeout)
-        end
-      end
-    rescue
-      raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
-    end
-
     def links
       get_service.linked_to_service.map { |service| KumoDockerCloud::Service.new(stack_name, service[:name]) }
     end
