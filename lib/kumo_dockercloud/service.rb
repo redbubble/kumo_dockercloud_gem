@@ -30,8 +30,6 @@ module KumoDockerCloud
           sleep(5)
           check(checks, timeout)
         end
-
-        true
       end
     rescue
       raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
