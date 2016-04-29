@@ -35,7 +35,9 @@ module KumoDockerCloud
       green_service = switching_service.links.find { |linked_service| services.find { |service| service.name == linked_service.name } }
       blue_service = services.find { |service| service.name != green_service.name }
 
-      deploy(blue_service.name, version, checks, check_timeout)
+      blue_service.deploy(version)
+      blue_service.check(checks, check_timeout) if checks
+
       switching_service.set_link(blue_service)
       green_service.stop
     end
