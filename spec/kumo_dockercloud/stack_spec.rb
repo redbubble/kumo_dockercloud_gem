@@ -1,81 +1,94 @@
 describe KumoDockerCloud::Stack do
-  let(:service_api) { instance_double(DockerCloud::ServiceAPI) }
-  let(:uuid) { 'foo' }
-  let(:service_name) { 'test_service' }
+  let(:stack) { described_class.new(app_name, environment_name) }
   let(:app_name) { 'test_app' }
   let(:environment_name) { 'environment' }
-  let(:app_version) { '1' }
-  let(:client) { instance_double(DockerCloud::Client, stacks: stacks, services: service_api) }
-  let(:stacks) { double('stacks', all: [stack]) }
-  let(:stack_name) { "#{app_name}-#{environment_name}" }
-  let(:stack) { instance_double(DockerCloud::Stack, name: stack_name) }
-  let(:service) { instance_double(KumoDockerCloud::Service, uuid: uuid) }
-  let(:check_timeout) { 300 }
-
-  before do
-    allow(::DockerCloud::Client).to receive(:new).and_return(client)
-    allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name).and_return(service)
-    allow(service).to receive(:deploy).with("test_version")
-    allow(service).to receive(:check).with([], 300)
-  end
+  let(:stack_name) { stack.stack_name }
 
   describe '#deploy' do
-    subject { described_class.new(app_name, environment_name) }
+    let(:service_name) { 'test_service' }
+    let(:version) { '1' }
+    let(:check) { instance_double(KumoDockerCloud::ServiceCheck, verify: nil) }
+    let(:service) { instance_double(KumoDockerCloud::Service) }
 
-    it 'complains if passed a nil service name' do
-      expect { subject.deploy(nil, 1) }.to raise_error(KumoDockerCloud::Error, 'Service name cannot be nil')
+    before do
+      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name).and_return(service)
+      allow(service).to receive(:deploy).with(version)
     end
 
-    it 'complains if passed an empty service name' do
-      expect { subject.deploy("", 1) }.to raise_error(KumoDockerCloud::Error, 'Service name cannot be empty')
-    end
-
-    it 'complains if passed a nil version' do
-      expect { subject.deploy("test_service", nil) }.to raise_error(KumoDockerCloud::Error, 'Version cannot be nil')
-    end
-
-    it 'complains if passed an empty version' do
-      expect { subject.deploy("test_service", "") }.to raise_error(KumoDockerCloud::Error, 'Version cannot be empty')
-    end
+    subject { stack.deploy(service_name, version) }
 
     it 'deploys the version of my service' do
-      expect(service).to receive(:deploy).with("test_version")
-      subject.deploy('test_service', 'test_version')
+      expect(service).to receive(:deploy).with(version)
+      subject
     end
 
-    it 'passes any checks to the checker' do
-      checks = ["check1", "check2"]
-      allow(service).to receive(:deploy).with("test_version")
-      expect(service).to receive(:check).with(checks, check_timeout)
-      subject.deploy('test_service', 'test_version', checks)
+    context "validation" do
+      context "nil name" do
+        let(:service_name) { nil }
+
+        it "complains" do
+          expect { subject }.to raise_error(KumoDockerCloud::Error, 'Service name cannot be nil')
+        end
+      end
+
+      context "empty name" do
+        let(:service_name) { "" }
+
+        it "complains" do
+          expect { subject }.to raise_error(KumoDockerCloud::Error, 'Service name cannot be empty')
+        end
+      end
+
+      context "nil version" do
+        let(:version) { nil }
+
+        it "complains" do
+          expect { subject }.to raise_error(KumoDockerCloud::Error, 'Version cannot be nil')
+        end
+      end
+
+      context "empty version" do
+        let(:version) { "" }
+
+        it "complains" do
+          expect { subject }.to raise_error(KumoDockerCloud::Error, 'Version cannot be empty')
+        end
+      end
     end
 
-    it 'passes any specific timeout to the checker' do
-      checks = ["check1", "check2"]
-      shortened_timeout = 10
-      allow(service).to receive(:deploy).with("test_version")
-      expect(service).to receive(:check).with(checks, shortened_timeout)
-      subject.deploy('test_service', 'test_version', checks, shortened_timeout)
-    end
+    context "with a check supplied" do
+      subject { stack.deploy(service_name, version, check) }
 
+      it 'uses the supplied service check' do
+        expect(check).to receive(:verify).with(service)
+        subject
+      end
+    end
   end
 
   describe '#deploy_blue_green' do
+    let(:service_api) { instance_double(DockerCloud::ServiceAPI) }
+    let(:uuid) { 'foo' }
+    let(:client) { instance_double(DockerCloud::Client, stacks: stacks, services: service_api) }
+    let(:stacks) { double('stacks', all: [stack]) }
+    let(:service_name) { 'test_service' }
+    let(:version) { '1' }
+    let(:check) { instance_double(KumoDockerCloud::ServiceCheck, verify: nil) }
+    let(:service) { instance_double(KumoDockerCloud::Service) }
+
+
     let(:service_a_uuid) { 'service_a_uuid' }
     let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, uuid: uuid, name: "service-a") }
     let(:service_b_uuid) { 'service_b_uuid' }
     let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, uuid: uuid, name: "service-b") }
     let(:nginx) { instance_double(KumoDockerCloud::Service, uuid: "nginx_uuid") }
     let(:version) { "1" }
-    let(:deployment_checks) { [] }
     let(:links) { [service_a] }
-    let(:check_timeout) { 120 }
     let(:deploy_options) do
       {
         service_names: ["service-a", "service-b"],
         version: version,
-        checks: deployment_checks,
-        check_timeout: check_timeout,
+        check: check,
         switching_service_name: "nginx"
       }
     end
@@ -83,6 +96,10 @@ describe KumoDockerCloud::Stack do
     subject { described_class.new(app_name, environment_name).deploy_blue_green(deploy_options) }
 
     before do
+      allow(::DockerCloud::Client).to receive(:new).and_return(client)
+      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name).and_return(service)
+      allow(service).to receive(:deploy).with(version)
+
       allow(KumoDockerCloud::Service).to receive(:new)
         .with(stack_name, "service-a")
         .and_return(service_a)
@@ -101,7 +118,6 @@ describe KumoDockerCloud::Stack do
       allow(service_a).to receive(:stop)
 
       allow(service_b).to receive(:deploy).with(version)
-      allow(service_b).to receive(:check).with(deployment_checks, check_timeout)
     end
 
     context 'when parameters are missing' do
@@ -123,7 +139,7 @@ describe KumoDockerCloud::Stack do
 
     it 'deploys to the blue service only' do
       expect(service_b).to receive(:deploy).with(version)
-      expect(service_b).to receive(:check).with(deployment_checks, check_timeout)
+      expect(check).to receive(:verify).with(service_b)
       expect(service_a).to_not receive(:deploy)
       subject
     end

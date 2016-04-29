@@ -9,21 +9,24 @@ module KumoDockerCloud
       @options = options
     end
 
-    def deploy(service_name, version, checks = [], check_timeout = 300)
+    def deploy(service_name, version, check = ServiceCheck.new)
       validate_params(service_name, 'Service name')
       validate_params(version, 'Version')
 
       service = Service.new(stack_name, service_name)
       service.deploy(version)
-      service.check(checks, check_timeout)
+      check.verify(service)
     end
 
     def deploy_blue_green(options)
       service_names = options[:service_names]
       version = options[:version]
-      checks = options[:checks] || []
+      check = options[:check] || ServiceCheck.new
+      checks = options[:checks]
       check_timeout = options[:check_timeout] || 300
       switching_service_name = options[:switching_service_name]
+
+      check = ServiceCheck.new(checks, check_timeout) if checks
 
       validate_params(version, "Version")
       validate_params(service_names, "Service names")
@@ -36,7 +39,7 @@ module KumoDockerCloud
       blue_service = services.find { |service| service.name != green_service.name }
 
       blue_service.deploy(version)
-      blue_service.check(checks, check_timeout)
+      check.verify(blue_service)
 
       switching_service.set_link(blue_service)
       green_service.stop
