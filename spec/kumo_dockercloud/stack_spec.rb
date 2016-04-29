@@ -18,6 +18,7 @@ describe KumoDockerCloud::Stack do
     allow(::DockerCloud::Client).to receive(:new).and_return(client)
     allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name).and_return(service)
     allow(service).to receive(:deploy).with("test_version")
+    allow(service).to receive(:check).with([], 300)
   end
 
   describe '#deploy' do
