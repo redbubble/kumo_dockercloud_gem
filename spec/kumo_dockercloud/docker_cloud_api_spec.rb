@@ -1,4 +1,3 @@
-require 'kumo_dockercloud/docker_cloud_api'
 require 'webmock/rspec'
 
 describe KumoDockerCloud::DockerCloudApi do

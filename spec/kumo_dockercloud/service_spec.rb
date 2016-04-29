@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'httpi'
 
 describe KumoDockerCloud::Service do
@@ -58,11 +57,10 @@ describe KumoDockerCloud::Service do
       allow(docker_cloud_service).to receive(:containers).and_return(containers)
     end
 
-    it 'resolves to true if all the checks eventually pass' do
+    it 'runs without incident' do
       allow(subject).to receive(:sleep).and_return(nil)
-      expect(subject.check(checks, check_timeout)).to eq(true)
+      subject.check(checks, check_timeout)
     end
-
 
     it 'raises an error if any check fails to pass within the timeout period' do
       short_timeout = 2

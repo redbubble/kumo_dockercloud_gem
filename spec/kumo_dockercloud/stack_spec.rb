@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe KumoDockerCloud::Stack do
   let(:service_api) { instance_double(DockerCloud::ServiceAPI) }
   let(:uuid) { 'foo' }

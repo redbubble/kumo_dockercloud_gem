@@ -1,6 +1,3 @@
-require 'rspec'
-require 'spec_helper'
-
 describe KumoDockerCloud::StateValidator do
   describe '#wait_for_state' do
     subject { state_validator.wait_for_state('done', 1) }
