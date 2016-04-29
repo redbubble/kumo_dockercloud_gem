@@ -22,11 +22,7 @@ module KumoDockerCloud
       service_names = options[:service_names]
       version = options[:version]
       check = options[:check] || ServiceCheck.new
-      checks = options[:checks]
-      check_timeout = options[:check_timeout] || 300
       switching_service_name = options[:switching_service_name]
-
-      check = ServiceCheck.new(checks, check_timeout) if checks
 
       validate_params(version, "Version")
       validate_params(service_names, "Service names")
