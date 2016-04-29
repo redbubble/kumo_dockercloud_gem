@@ -57,12 +57,12 @@ module KumoDockerCloud
       get_service.resource_uri
     end
 
-    private
-    attr_reader :stack_name
-
     def containers
       get_service.containers
     end
+
+    private
+    attr_reader :stack_name
 
     def update_image(version)
       docker_cloud_api.services.update(uuid, image: "#{image_name}:#{version}")
