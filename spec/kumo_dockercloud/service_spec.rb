@@ -36,12 +36,16 @@ describe KumoDockerCloud::Service do
 
   describe "#links" do
     let(:linked_service_uuid) { "i_am_the_db" }
+    let(:linked_service_resource_uri) { "/api/app/v1/service/#{linked_service_uuid}" }
     let(:linked_service_internal_name) { "db" }
+
+    let(:this_service) { double(:this_service, uuid: linked_service_uuid, resource_uri: linked_service_resource_uri) }
+
     let(:linked_to_service) do
       {
         from_service: service_uuid,
         name: linked_service_internal_name,
-        to_service: linked_service_uuid
+        to_service: linked_service_resource_uri
       }
     end
 
@@ -51,7 +55,8 @@ describe KumoDockerCloud::Service do
 
     it "returns a list of KumoDockerCloud::Service object that are linked to from this service" do
       links = subject.links
-      expect(links.first).to have_attributes(name: linked_service_internal_name)
+      allow(docker_cloud_api).to receive(:service_by_stack_and_service_name).and_return(this_service)
+      expect(links.first).to have_attributes(resource_uri: linked_service_resource_uri)
       expect(links.size).to eq(1)
     end
 

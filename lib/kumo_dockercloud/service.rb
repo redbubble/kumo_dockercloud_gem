@@ -4,6 +4,11 @@ module KumoDockerCloud
   class Service
     attr_reader :name
 
+    def self.service_by_resource_uri(resource_uri)
+      #TODO: Hook this up
+      KumoDockerCloud::DockerCloudApi.new.service_by_resource_uri
+    end
+
     def initialize(stack_name, service_name)
       @stack_name = stack_name
       @name = service_name
@@ -16,6 +21,7 @@ module KumoDockerCloud
 
     def links
       get_service.linked_to_service.map { |service| KumoDockerCloud::Service.new(stack_name, service[:name]) }
+      #self.service_by_uri(service[:to_service]) }
     end
 
     def set_link(service_to_link, link_internal_name)
