@@ -1,5 +1,3 @@
-require 'httpi'
-
 describe KumoDockerCloud::Service do
   let(:service_image) { "repository/docker_image_name:version" }
   let(:service_uuid) { "i_am_a_unique_snowflower" }
