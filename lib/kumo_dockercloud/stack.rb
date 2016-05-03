@@ -9,35 +9,37 @@ module KumoDockerCloud
       @options = options
     end
 
-    def deploy(service_name, version, checks = nil, check_timeout = 300)
+    def deploy(service_name, version, checker = ServiceChecker.new)
       validate_params(service_name, 'Service name')
       validate_params(version, 'Version')
 
       service = Service.new(stack_name, service_name)
       service.deploy(version)
-      service.check(checks, check_timeout) if checks
+      checker.verify(service)
     end
 
     def deploy_blue_green(options)
       service_names = options[:service_names]
       version = options[:version]
-      checks = options[:checks]
-      check_timeout = options[:check_timeout]
+      checker = options[:checker] || ServiceChecker.new
       switching_service_name = options[:switching_service_name]
 
       validate_params(version, "Version")
       validate_params(service_names, "Service names")
       validate_params(switching_service_name, "Switching service name")
 
-      services = service_names.map { |service_name| Service.new(stack_name, service_name) }
-
       switching_service = Service.new(stack_name, switching_service_name)
-      green_service = switching_service.links.find { |linked_service| services.find { |service| service.name == linked_service.name } }
-      blue_service = services.find { |service| service.name != green_service.name }
+      link = switching_service.links.find { |link| service_names.include?(Service.service_by_resource_uri(link[:to_service]).name) }
+      active_service = Service.service_by_resource_uri(link[:to_service])
 
-      deploy(blue_service.name, version, checks, check_timeout)
-      switching_service.set_link(blue_service)
-      green_service.stop
+      inactive_service_name = service_names.find { |name| name != active_service.name }
+      inactive_service = Service.new(stack_name, inactive_service_name)
+
+      inactive_service.deploy(version)
+      checker.verify(inactive_service)
+
+      switching_service.set_link(inactive_service, link[:name])
+      active_service.stop
     end
 
     private

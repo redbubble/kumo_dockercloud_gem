@@ -1,4 +1,3 @@
-require 'kumo_dockercloud/docker_cloud_api'
 require 'webmock/rspec'
 
 describe KumoDockerCloud::DockerCloudApi do
@@ -157,6 +156,52 @@ describe KumoDockerCloud::DockerCloudApi do
       let(:containers2) { [container, container] }
 
       it { should == [container, container, container] }
+    end
+  end
+
+  context '#service_by_resource_uri' do
+    let(:resource_uri) { "look_at_me_im_a_resource_id" }
+    let(:service_name) { 'batman' }
+    let(:service) { double(DockerCloud::Service, name: service_name) }
+    let(:services_mock) { double(DockerCloud::StackAPI, get_from_uri: service ) }
+
+    subject { api.service_by_resource_uri(resource_uri) }
+
+    before do
+      allow_any_instance_of(::DockerCloud::Client).to receive(:services).and_return(services_mock)
+    end
+
+    context 'when the service exists' do
+      it { should == service }
+    end
+
+    context 'when there is no service' do
+      let(:services_mock) { double(DockerCloud::ServiceAPI, get_from_uri: nil ) }
+
+      it { should be_nil }
+    end
+  end
+
+  context '#stack_by_resource_uri' do
+    let(:resource_uri) { "look_at_me_im_a_resource_id" }
+    let(:stack_name) { 'batman' }
+    let(:stack) { double(DockerCloud::Stack, name: stack_name) }
+    let(:stacks_mock) { double(DockerCloud::StackAPI, get_from_uri: stack ) }
+
+    subject { api.stack_by_resource_uri(resource_uri) }
+
+    before do
+      allow_any_instance_of(::DockerCloud::Client).to receive(:stacks).and_return(stacks_mock)
+    end
+
+    context 'when the stack exists' do
+      it { should == stack }
+    end
+
+    context 'when there is no service' do
+      let(:stacks_mock) { double(DockerCloud::StackAPI, get_from_uri: nil ) }
+
+      it { should be_nil }
     end
   end
 

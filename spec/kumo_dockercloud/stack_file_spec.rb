@@ -1,6 +1,3 @@
-require_relative '../../lib/kumo_dockercloud/environment_config'
-require_relative '../../lib/kumo_dockercloud/stack_file'
-
 describe KumoDockerCloud::StackFile do
 
   let(:app_name) { 'application-stack-name' }

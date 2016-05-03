@@ -9,42 +9,31 @@ module KumoDockerCloud
       @name = service_name
     end
 
+    def self.service_by_resource_uri(resource_uri)
+      api = KumoDockerCloud::DockerCloudApi.new
+      service = api.service_by_resource_uri(resource_uri)
+      stack = api.stacks.get_from_uri(service.info[:stack])
+
+      self.new(stack.name, service.name)
+    end
+
     def deploy(version)
       update_image(version)
       redeploy
     end
 
-    def check(checks, timeout)
-      Timeout::timeout(timeout) do
-        all_tests_passed = true
-        containers.each do |container|
-          checks.each do |check|
-            unless check.call(container)
-              all_tests_passed = false
-            end
-          end
-        end
-
-        unless all_tests_passed
-          print '.'
-          sleep(5)
-          check(checks, timeout)
-        end
-
-        true
-      end
-    rescue
-      raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
+    def linked_services
+      get_service.linked_to_service.map { |link| KumoDockerCloud::Service.service_by_resource_uri(link[:to_service]) }
     end
 
     def links
-      get_service.linked_to_service.map { |service| KumoDockerCloud::Service.new(stack_name, service[:name]) }
+      get_service.linked_to_service
     end
 
-    def set_link(service_to_link)
+    def set_link(service_to_link, link_internal_name)
       linked_service = {
         to_service: service_to_link.resource_uri,
-        name: service_to_link.name,
+        name: link_internal_name,
         from_service: resource_uri
       }
 
@@ -59,12 +48,12 @@ module KumoDockerCloud
       get_service.resource_uri
     end
 
-    private
-    attr_reader :stack_name
-
     def containers
       get_service.containers
     end
+
+    private
+    attr_reader :stack_name
 
     def update_image(version)
       docker_cloud_api.services.update(uuid, image: "#{image_name}:#{version}")

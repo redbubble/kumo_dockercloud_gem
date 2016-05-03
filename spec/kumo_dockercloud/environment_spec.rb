@@ -1,6 +1,3 @@
-require 'kumo_dockercloud/environment'
-require 'kumo_dockercloud/environment_config'
-
 describe KumoDockerCloud::Environment do
   let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:app_name) { 'application-stack-name' }
