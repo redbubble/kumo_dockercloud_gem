@@ -23,7 +23,7 @@ module KumoDockerCloud
     end
 
     def linked_services
-      get_service.linked_to_service.map { |service| KumoDockerCloud::Service.service_by_resource_uri(service[:to_service]) }
+      get_service.linked_to_service.map { |link| KumoDockerCloud::Service.service_by_resource_uri(link[:to_service]) }
     end
 
     def set_link(service_to_link, link_internal_name)
