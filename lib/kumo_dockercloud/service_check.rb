@@ -1,5 +1,5 @@
 module KumoDockerCloud
-  class ServiceCheck
+  class ServiceChecker
     attr_reader :checks, :timeout
 
     def initialize(checks = [], timeout = 300)

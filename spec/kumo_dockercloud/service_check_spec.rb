@@ -1,4 +1,4 @@
-describe KumoDockerCloud::ServiceCheck do
+describe KumoDockerCloud::ServiceChecker do
   describe ".initialize" do
     context "defaults" do
       subject { described_class.new }

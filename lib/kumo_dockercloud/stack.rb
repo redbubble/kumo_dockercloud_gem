@@ -9,19 +9,19 @@ module KumoDockerCloud
       @options = options
     end
 
-    def deploy(service_name, version, check = ServiceCheck.new)
+    def deploy(service_name, version, checker = ServiceChecker.new)
       validate_params(service_name, 'Service name')
       validate_params(version, 'Version')
 
       service = Service.new(stack_name, service_name)
       service.deploy(version)
-      check.verify(service)
+      checker.verify(service)
     end
 
     def deploy_blue_green(options)
       service_names = options[:service_names]
       version = options[:version]
-      check = options[:check] || ServiceCheck.new
+      checker = options[:checker] || ServiceChecker.new
       switching_service_name = options[:switching_service_name]
       switching_service_internal_link_name = options[:switching_service_internal_link_name]
 
@@ -37,7 +37,7 @@ module KumoDockerCloud
       inactive_service = services.find { |service| service.name != active_service.name }
 
       inactive_service.deploy(version)
-      check.verify(inactive_service)
+      checker.verify(inactive_service)
 
       switching_service.set_link(inactive_service, switching_service_internal_link_name)
       active_service.stop

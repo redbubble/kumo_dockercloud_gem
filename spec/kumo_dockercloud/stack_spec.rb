@@ -7,7 +7,7 @@ describe KumoDockerCloud::Stack do
   describe '#deploy' do
     let(:service_name) { 'test_service' }
     let(:version) { '1' }
-    let(:check) { instance_double(KumoDockerCloud::ServiceCheck, verify: nil) }
+    let(:checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil) }
     let(:service) { instance_double(KumoDockerCloud::Service) }
 
     before do
@@ -56,11 +56,11 @@ describe KumoDockerCloud::Stack do
       end
     end
 
-    context "with a check supplied" do
-      subject { stack.deploy(service_name, version, check) }
+    context "with a checker supplied" do
+      subject { stack.deploy(service_name, version, checker) }
 
-      it 'uses the supplied service check' do
-        expect(check).to receive(:verify).with(service)
+      it 'uses the supplied service checker' do
+        expect(checker).to receive(:verify).with(service)
         subject
       end
     end
@@ -73,7 +73,7 @@ describe KumoDockerCloud::Stack do
     let(:stacks) { double('stacks', all: [stack]) }
     let(:service_name) { 'test_service' }
     let(:version) { '1' }
-    let(:check) { instance_double(KumoDockerCloud::ServiceCheck, verify: nil) }
+    let(:checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil) }
     let(:service) { instance_double(KumoDockerCloud::Service) }
 
 
@@ -89,7 +89,7 @@ describe KumoDockerCloud::Stack do
       {
         service_names: ["service-a", "service-b"],
         version: version,
-        check: check,
+        checker: checker,
         switching_service_name: "nginx",
         switching_service_internal_link_name: switching_service_internal_link_name
       }
@@ -146,7 +146,7 @@ describe KumoDockerCloud::Stack do
 
     it 'deploys to the blue service only' do
       expect(service_b).to receive(:deploy).with(version)
-      expect(check).to receive(:verify).with(service_b)
+      expect(checker).to receive(:verify).with(service_b)
       expect(service_a).to_not receive(:deploy)
       subject
     end
