@@ -32,7 +32,7 @@ describe KumoDockerCloud::Service do
     end
   end
 
-  describe "#links" do
+  describe "#linked_services" do
     let(:linked_service_uuid) { "i_am_the_db" }
     let(:linked_service_resource_uri) { "/api/app/v1/service/#{linked_service_uuid}" }
     let(:linked_service_internal_name) { "db" }
