@@ -57,14 +57,14 @@ describe KumoDockerCloud::Service do
       allow(docker_cloud_api).to receive(:stack_by_resource_uri).with(stack_resource_uri).and_return(stack)
       allow(docker_cloud_api).to receive(:service_by_stack_and_service_name).with(stack.name, linked_service_name).and_return(linked_service)
 
-      links = subject.links
+      links = subject.linked_services
       expect(links.first).to have_attributes(resource_uri: linked_service_resource_uri)
       expect(links.size).to eq(1)
     end
 
     it "returns an empty array if there are no links" do
       allow(docker_cloud_service).to receive(:linked_to_service).and_return([])
-      expect(subject.links).to eq([])
+      expect(subject.linked_services).to eq([])
     end
   end
 

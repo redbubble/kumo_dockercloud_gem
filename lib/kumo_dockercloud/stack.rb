@@ -33,7 +33,7 @@ module KumoDockerCloud
       services = service_names.map { |service_name| Service.new(stack_name, service_name) }
 
       switching_service = Service.new(stack_name, switching_service_name)
-      active_service = switching_service.links.find { |linked_service| service_names.include?(linked_service.name) }
+      active_service = switching_service.linked_services.find { |linked_service| service_names.include?(linked_service.name) }
       inactive_service = services.find { |service| service.name != active_service.name }
 
       inactive_service.deploy(version)

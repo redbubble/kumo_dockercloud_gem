@@ -83,7 +83,7 @@ describe KumoDockerCloud::Stack do
     let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, uuid: uuid, name: "service-b") }
     let(:nginx) { instance_double(KumoDockerCloud::Service, uuid: "nginx_uuid") }
     let(:version) { "1" }
-    let(:links) { [service_a] }
+    let(:linked_services) { [service_a] }
     let(:switching_service_internal_link_name) { "app" }
     let(:deploy_options) do
       {
@@ -114,7 +114,7 @@ describe KumoDockerCloud::Stack do
         .with(stack_name, "nginx")
         .and_return(nginx)
 
-      allow(nginx).to receive(:links).and_return(links)
+      allow(nginx).to receive(:linked_services).and_return(linked_services)
       allow(nginx).to receive(:set_link).with(service_b, switching_service_internal_link_name)
 
       allow(service_a).to receive(:stop)

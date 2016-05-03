@@ -22,7 +22,7 @@ module KumoDockerCloud
       redeploy
     end
 
-    def links
+    def linked_services
       get_service.linked_to_service.map { |service| KumoDockerCloud::Service.service_by_resource_uri(service[:to_service]) }
     end
 
