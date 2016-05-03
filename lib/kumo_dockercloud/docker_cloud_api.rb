@@ -37,5 +37,9 @@ module KumoDockerCloud
     def service_by_resource_uri(resource_uri)
       @client.services.get_from_uri(resource_uri)
     end
+
+    def stack_by_resource_uri(resource_uri)
+      @client.stacks.get_from_uri(resource_uri)
+    end
   end
 end

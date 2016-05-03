@@ -4,14 +4,17 @@ module KumoDockerCloud
   class Service
     attr_reader :name
 
-    def self.service_by_resource_uri(resource_uri)
-      #TODO: Hook this up
-      KumoDockerCloud::DockerCloudApi.new.service_by_resource_uri
-    end
-
     def initialize(stack_name, service_name)
       @stack_name = stack_name
       @name = service_name
+    end
+
+    def self.service_by_resource_uri(resource_uri)
+      api = KumoDockerCloud::DockerCloudApi.new
+      service = api.service_by_resource_uri(resource_uri)
+      stack = api.stack_by_resource_uri(service.stack)
+
+      self.new(stack.name, service.name)
     end
 
     def deploy(version)
@@ -20,8 +23,7 @@ module KumoDockerCloud
     end
 
     def links
-      get_service.linked_to_service.map { |service| KumoDockerCloud::Service.new(stack_name, service[:name]) }
-      #self.service_by_uri(service[:to_service]) }
+      get_service.linked_to_service.map { |service| KumoDockerCloud::Service.service_by_resource_uri(service[:to_service]) }
     end
 
     def set_link(service_to_link, link_internal_name)
