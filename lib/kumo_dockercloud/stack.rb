@@ -23,12 +23,12 @@ module KumoDockerCloud
       version = options[:version]
       check = options[:check] || ServiceCheck.new
       switching_service_name = options[:switching_service_name]
-      switching_service_link_name = options[:switching_service_link_name]
+      switching_service_internal_link_name = options[:switching_service_internal_link_name]
 
       validate_params(version, "Version")
       validate_params(service_names, "Service names")
       validate_params(switching_service_name, "Switching service name")
-      validate_params(switching_service_link_name, "Switching service link name")
+      validate_params(switching_service_internal_link_name, "Switching service internal link name")
 
       services = service_names.map { |service_name| Service.new(stack_name, service_name) }
 
@@ -39,7 +39,7 @@ module KumoDockerCloud
       inactive_service.deploy(version)
       check.verify(inactive_service)
 
-      switching_service.set_link(inactive_service, switching_service_link_name)
+      switching_service.set_link(inactive_service, switching_service_internal_link_name)
       active_service.stop
     end
 

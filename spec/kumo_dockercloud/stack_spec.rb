@@ -84,14 +84,14 @@ describe KumoDockerCloud::Stack do
     let(:nginx) { instance_double(KumoDockerCloud::Service, uuid: "nginx_uuid") }
     let(:version) { "1" }
     let(:links) { [service_a] }
-    let(:switching_service_link_name) { "app" }
+    let(:switching_service_internal_link_name) { "app" }
     let(:deploy_options) do
       {
         service_names: ["service-a", "service-b"],
         version: version,
         check: check,
         switching_service_name: "nginx",
-        switching_service_link_name: switching_service_link_name
+        switching_service_internal_link_name: switching_service_internal_link_name
       }
     end
 
@@ -115,7 +115,7 @@ describe KumoDockerCloud::Stack do
         .and_return(nginx)
 
       allow(nginx).to receive(:links).and_return(links)
-      allow(nginx).to receive(:set_link).with(service_b, switching_service_link_name)
+      allow(nginx).to receive(:set_link).with(service_b, switching_service_internal_link_name)
 
       allow(service_a).to receive(:stop)
 
@@ -139,8 +139,8 @@ describe KumoDockerCloud::Stack do
       end
 
       it 'blows up when switching_service_link_name is missing' do
-        deploy_options.delete(:switching_service_link_name)
-        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Switching service link name cannot be nil")
+        deploy_options.delete(:switching_service_internal_link_name)
+        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Switching service internal link name cannot be nil")
       end
     end
 
@@ -152,7 +152,7 @@ describe KumoDockerCloud::Stack do
     end
 
     it 'switches over to the blue service on a successful deployment' do
-      expect(nginx).to receive(:set_link).with(service_b, switching_service_link_name)
+      expect(nginx).to receive(:set_link).with(service_b, switching_service_internal_link_name)
       subject
     end
 
