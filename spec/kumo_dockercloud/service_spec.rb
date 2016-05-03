@@ -3,7 +3,8 @@ describe KumoDockerCloud::Service do
   let(:service_uuid) { "i_am_a_unique_snowflower" }
   let(:docker_cloud_service) { double(:service, uuid: service_uuid, image_name: service_image, containers: [], resource_uri: "api/v1/#{service_uuid}")}
   let(:docker_cloud_services_api) { double(:services_api) }
-  let(:docker_cloud_api) { instance_double(KumoDockerCloud::DockerCloudApi, services: docker_cloud_services_api)}
+  let(:docker_cloud_stacks_api) { instance_double(DockerCloud::StackAPI, :stack_api) }
+  let(:docker_cloud_api) { instance_double(KumoDockerCloud::DockerCloudApi, services: docker_cloud_services_api, stacks: docker_cloud_stacks_api)}
 
   subject { described_class.new('stack_name', 'service_name') }
 
@@ -38,7 +39,7 @@ describe KumoDockerCloud::Service do
     let(:linked_service_internal_name) { "db" }
     let(:linked_service_name) { "db-1" }
     let(:stack_resource_uri) { "stack_resource_uri" }
-    let(:linked_service) { double(:linked_service, uuid: linked_service_uuid, resource_uri: linked_service_resource_uri, stack: stack_resource_uri, name: linked_service_name) }
+    let(:linked_service) { double(:linked_service, uuid: linked_service_uuid, resource_uri: linked_service_resource_uri, info: { stack: stack_resource_uri}, name: linked_service_name) }
     let(:linked_to_service) do
       {
         from_service: service_uuid,
@@ -54,7 +55,7 @@ describe KumoDockerCloud::Service do
 
     it "returns a list of KumoDockerCloud::Service object that are linked to from this service" do
       allow(docker_cloud_api).to receive(:service_by_resource_uri).with(linked_service_resource_uri).and_return(linked_service)
-      allow(docker_cloud_api).to receive(:stack_by_resource_uri).with(stack_resource_uri).and_return(stack)
+      allow(docker_cloud_stacks_api).to receive(:get_from_uri).with(stack_resource_uri).and_return(stack)
       allow(docker_cloud_api).to receive(:service_by_stack_and_service_name).with(stack.name, linked_service_name).and_return(linked_service)
 
       links = subject.linked_services

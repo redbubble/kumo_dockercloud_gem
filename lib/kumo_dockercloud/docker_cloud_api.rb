@@ -4,7 +4,7 @@ require 'base64' # left out of DockerCloud gem
 module KumoDockerCloud
   class DockerCloudApi
     extend Forwardable
-    def_delegator :@client, :services
+    def_delegators :@client, :services, :stacks
 
     def initialize(options = {})
       options[:username] ||= ENV['DOCKERCLOUD_USER']

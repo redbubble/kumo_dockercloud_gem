@@ -12,7 +12,7 @@ module KumoDockerCloud
     def self.service_by_resource_uri(resource_uri)
       api = KumoDockerCloud::DockerCloudApi.new
       service = api.service_by_resource_uri(resource_uri)
-      stack = api.stack_by_resource_uri(service.stack)
+      stack = api.stacks.get_from_uri(service.info[:stack])
 
       self.new(stack.name, service.name)
     end
