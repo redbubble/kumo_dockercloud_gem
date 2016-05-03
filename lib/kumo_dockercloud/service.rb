@@ -27,10 +27,9 @@ module KumoDockerCloud
     end
 
     def set_link(service_to_link, link_internal_name)
-      #TODO: use the link_internal_name
       linked_service = {
         to_service: service_to_link.resource_uri,
-        name: service_to_link.name,
+        name: link_internal_name,
         from_service: resource_uri
       }
 

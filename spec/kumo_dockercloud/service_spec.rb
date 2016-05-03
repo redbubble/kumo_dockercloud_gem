@@ -72,6 +72,7 @@ describe KumoDockerCloud::Service do
 
   describe "#set_link" do
     let(:linked_service_uuid) { "i_am_the_db" }
+    let(:linked_service_name) { "db-1" }
 
     let(:linked_service_internal_name) { "db" }
     let(:linked_to_service) do
@@ -82,14 +83,8 @@ describe KumoDockerCloud::Service do
       }
     end
 
-    let(:linked_service) { KumoDockerCloud::Service.new('stack_name', linked_service_internal_name) }
     let(:this_service) { double(:this_service, uuid: service_uuid, resource_uri: "api/v1/#{service_uuid}") }
-    let(:linked_service) { double(:linked_service, uuid: linked_service_uuid, resource_uri: "api/v1/#{linked_service_uuid}", name: linked_service_internal_name) }
-
-    before do
-      allow(docker_cloud_api).to receive(:service_by_stack_and_service_name).with('stack_name', 'service_name').and_return(this_service)
-      allow(docker_cloud_api).to receive(:service_by_stack_and_service_name).with('stack_name', linked_service_internal_name).and_return(linked_service)
-    end
+    let(:linked_service) { double(:linked_service, uuid: linked_service_uuid, resource_uri: "api/v1/#{linked_service_uuid}", name: linked_service_name) }
 
     it "updates the link attribute" do
       expect(docker_cloud_services_api).to receive(:update).with(service_uuid, { linked_to_service: [linked_to_service] })
