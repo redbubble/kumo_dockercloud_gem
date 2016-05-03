@@ -1,9 +1,11 @@
 describe KumoDockerCloud::EnvironmentConfig do
   let(:env_name) { 'test' }
+  let(:app_name) { "app-foo" }
   let(:config_path) { File.join(__dir__, '../fixtures/config') }
-  subject(:instance) { described_class.new(app_name: 'application-stack-name', env_name: env_name, config_path: config_path) }
+  subject(:instance) { described_class.new(app_name: app_name, env_name: env_name, config_path: config_path) }
 
   let(:docker_cloud_api) { instance_double('KumoDockerCloud::DockerCloudApi') }
+  before { allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api }
 
   describe '#get_binding' do
     let(:services_for_stack) { [] }
@@ -61,11 +63,34 @@ describe KumoDockerCloud::EnvironmentConfig do
     end
   end
 
-  context 'with API mocked' do
-    before do
-      allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
-      allow(docker_cloud_api).to receive(:services_by_stack_name).with("application-stack-name-#{env_name}").and_return(services_for_stack)
+  describe "#tagged_app_image" do
+    subject { instance.tagged_app_image(service_name) }
+
+    let(:service_name) { "app-foo-service-a" }
+
+    before { expect(docker_cloud_api).to receive(:service_by_stack_and_service_name).with(instance.stack_name, service_name).and_return(service) }
+
+    context "no service present in stack" do
+      let(:service) { nil }
+
+      it "returns the master application image" do
+        expect(subject).to eq("redbubble/#{app_name}:master")
+      end
     end
+
+    context "service present in stack" do
+      let(:service) { instance_double(DockerCloud::Service, image_name: current_image_name) }
+      let(:current_image_name) { "redbubble/#{app_name}:14" }
+
+      it "returns the current service image" do
+        expect(subject).to eq(current_image_name)
+      end
+    end
+
+  end
+
+  context 'with API mocked' do
+    before { allow(docker_cloud_api).to receive(:services_by_stack_name).with("#{app_name}-#{env_name}").and_return(services_for_stack) }
 
     describe '#image_name' do
       subject { instance.image_name }
@@ -82,7 +107,7 @@ describe KumoDockerCloud::EnvironmentConfig do
       context 'when there is no service for the given stack' do
         let(:services_for_stack) { [] }
 
-        it { expect(subject).to eq 'redbubble/application-stack-name:master' }
+        it { expect(subject).to eq "redbubble/#{app_name}:master" }
       end
     end
 

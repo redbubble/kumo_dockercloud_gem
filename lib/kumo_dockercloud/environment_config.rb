@@ -47,6 +47,11 @@ module KumoDockerCloud
       end
     end
 
+    def tagged_app_image(service_name)
+      service = docker_cloud_api.service_by_stack_and_service_name(stack_name, service_name)
+      service ? service.image_name : "redbubble/#{app_name}:master"
+    end
+
     def image_tag
       image_name.split(':').last
     end
