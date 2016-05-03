@@ -1,31 +1,35 @@
 module KumoDockerCloud
   class ServiceChecker
-    attr_reader :checks, :timeout
+    attr_reader :checks, :timeout, :quiet_time
 
-    def initialize(checks = [], timeout = 300)
+    def initialize(checks = [], timeout = 300, quiet_time = 5)
       @checks = checks
       @timeout = timeout
+      @quiet_time = quiet_time
     end
 
     def verify(service)
       Timeout::timeout(timeout) do
-        all_tests_passed = true
-        checks.each do |check|
-          service.containers.each do |container|
-            unless check.call(container)
-              all_tests_passed = false
-            end
-          end
+
+        while any_check_failing?(service)
+          print '.'
+          sleep(quiet_time)
         end
 
-        unless all_tests_passed
-          print '.'
-          sleep(5)
-          check(checks, timeout)
+      end
+    rescue Timeout::Error
+      raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
+    end
+
+    private
+
+    def any_check_failing?(service)
+      checks.each do |check|
+        service.containers.each do |container|
+          return true unless check.call(container)
         end
       end
-    rescue
-      raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout")
+      false
     end
   end
 end

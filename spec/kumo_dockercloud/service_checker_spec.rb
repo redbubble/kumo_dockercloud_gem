@@ -10,6 +10,10 @@ describe KumoDockerCloud::ServiceChecker do
       it "has a timeout of 300 seconds" do
         expect(subject.timeout).to eq(300)
       end
+
+      it "has a quiet_time of 5 seconds" do
+        expect(subject.timeout).to eq(300)
+      end
     end
   end
 
@@ -18,13 +22,13 @@ describe KumoDockerCloud::ServiceChecker do
     let(:sad_check) { lambda { |container| expect(container).to eq(container); false } }
     let(:container) { double(:my_container) }
     let(:checks) {[happy_check]}
-    let(:timeout) { 10 }
+    let(:timeout) { 5 }
 
     let(:containers) { [container, container] }
 
     let(:service) { instance_double(KumoDockerCloud::Service, containers: containers) }
 
-    subject { described_class.new(checks, timeout).verify(service) }
+    subject { described_class.new(checks, timeout, 1).verify(service) }
 
     context "all checks successful" do
       it "runs without incident" do
@@ -42,11 +46,21 @@ describe KumoDockerCloud::ServiceChecker do
     end
 
     context "timing out check" do
-      let(:timeout) { 1 }
+      let(:timeout) { 2 }
       let(:checks) { [sad_check] }
 
       it "raises an error" do
         expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout")
+      end
+    end
+
+    context "second time is the charm" do
+      let(:mutating_state) { [] }
+      let(:mutating_check) { lambda { |container| mutating_state << 1; mutating_state.size > 1 } }
+      let(:checks) { [mutating_check] }
+
+      it "runs without incident" do
+        subject
       end
     end
   end
