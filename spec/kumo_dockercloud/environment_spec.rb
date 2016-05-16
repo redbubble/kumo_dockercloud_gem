@@ -15,10 +15,11 @@ describe KumoDockerCloud::Environment do
       }
     }
   }
-
+  let(:full_stack_name) { "#{app_name}-test" }
+  let(:confirmation_timeout) { 0.5 }
   let(:stack_template_path) { File.join(__dir__, '../fixtures/stack.yml.erb') }
 
-  let(:params) { {name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path} }
+  let(:params) { {name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path, confirmation_timeout: confirmation_timeout} }
 
   subject(:env) { described_class.new(params) }
 
@@ -29,9 +30,6 @@ describe KumoDockerCloud::Environment do
 
   describe "#apply" do
     subject { env.apply }
-
-    let(:full_stack_name) { "#{app_name}-test" }
-
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
@@ -60,7 +58,6 @@ describe KumoDockerCloud::Environment do
     end
 
     describe "waiting for running" do
-
       let(:state_validator) { double(KumoDockerCloud::StateValidator, wait_for_state: nil) }
 
       before do
@@ -88,5 +85,30 @@ describe KumoDockerCloud::Environment do
 
       subject
     end
+  end
+
+
+  describe "#destroy" do
+    subject { env.destroy }
+    before do
+      allow(KumoDockerCloud::ConsoleJockey).to receive(:flash_message).with("Warning! You are about to delete the Docker Cloud Stack #{full_stack_name}, enter 'yes' to continue.")
+    end
+
+    it "notifies the user of what it is about to delete" do
+      expect(KumoDockerCloud::ConsoleJockey).to receive(:flash_message).with("Warning! You are about to delete the Docker Cloud Stack #{full_stack_name}, enter 'yes' to continue.")
+      subject
+    end
+
+    it "does delete the stack if the user confirms" do
+      expect(KumoDockerCloud::ConsoleJockey).to receive(:get_confirmation).with(confirmation_timeout).and_return(true)
+      expect(env).to receive(:run_command).with("docker-cloud stack terminate --sync #{full_stack_name}")
+      subject
+    end
+
+    it "does not delete the stack if the the user refuses confirmation" do
+      expect(KumoDockerCloud::ConsoleJockey).to receive(:get_confirmation).with(confirmation_timeout).and_return(false)
+      subject
+    end
+
   end
 end
