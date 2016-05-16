@@ -11,6 +11,7 @@ module KumoDockerCloud
         key_string = key.to_s
         parsed[key_string]['environment'] ||= {}
         parsed[key_string]['environment'].merge!(converted_env_vars.fetch(key_string))
+        parsed[key_string]['environment'] = escape_characters_that_need_special_handling(parsed[key_string]['environment'])
       end
 
       parsed
@@ -18,6 +19,10 @@ module KumoDockerCloud
 
     def self.make_all_root_level_keys_strings(env_vars)
       env_vars.keys.reduce({}) { |acc, key| acc[key.to_s] = env_vars[key]; acc }
+    end
+
+    def self.escape_characters_that_need_special_handling(env_hash)
+      env_hash.keys.reduce({}) { |acc, key| acc[key] = env_hash[key].gsub(/[$]{1}/, "$$"); acc }
     end
 
     private_class_method :make_all_root_level_keys_strings
