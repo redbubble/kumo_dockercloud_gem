@@ -3,10 +3,11 @@ require 'erb'
 require 'tempfile'
 require 'forwardable'
 
+require_relative 'console_jockey'
 require_relative 'docker_cloud_api'
-require_relative 'state_validator'
 require_relative 'environment_config'
 require_relative 'stack_file'
+require_relative 'state_validator'
 
 #TODO refactor this to use the new checker inside Service
 module KumoDockerCloud
@@ -19,6 +20,7 @@ module KumoDockerCloud
       @env_vars = params.fetch(:env_vars, {})
       @stack_template_path = params.fetch(:stack_template_path)
       @timeout = params.fetch(:timeout, 120)
+      @confirmation_timeout = params.fetch(:confirmation_timeout, 30)
 
       app_name = params.fetch(:app_name)
       @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
@@ -39,6 +41,8 @@ module KumoDockerCloud
     end
 
     def destroy
+      ConsoleJockey.flash_message "Warning! You are about to delete the Docker Cloud Stack #{stack_name}, enter 'yes' to continue."
+      return unless ConsoleJockey.get_confirmation(@confirmation_timeout)
       run_command("docker-cloud stack terminate --sync #{stack_name}")
     end
 
