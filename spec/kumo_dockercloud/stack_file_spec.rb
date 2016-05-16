@@ -43,6 +43,7 @@ describe KumoDockerCloud::StackFile do
               TEST: thing
         eos
       end
+
       it 'should add new secrets to the environment' do
         expect(subject).to eq(app_name => {
           'image' => 'a-thing',
@@ -51,6 +52,29 @@ describe KumoDockerCloud::StackFile do
             'KEY' => 'VALUE'
           }
         })
+      end
+
+      context 'and environment variables that contain symbols that need special escaping' do
+        let(:stack_template) do
+          <<-eos
+            application-stack-name:
+              image: a-thing
+              environment:
+                TEST: 123$abc
+          eos
+        end
+
+        # to work around https://github.com/docker/dockercloud-cli/issues/17
+        it 'escapes environment variables that contain $ with an extra $' do
+
+          expect(subject).to eq(app_name => {
+            'image' => 'a-thing',
+            'environment' => {
+              'TEST' => '123$$abc',
+              'KEY' => 'VALUE'
+            }
+          })
+        end
       end
     end
 
@@ -61,6 +85,7 @@ describe KumoDockerCloud::StackFile do
             image: a-thing
         eos
       end
+
       it 'should create the environment with secrets in it' do
         expect(subject).to eq(app_name => {
           'image' => 'a-thing',
