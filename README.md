@@ -47,3 +47,11 @@ Changes to the gem can be manually tested end to end in a project that uses the 
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+## Changelog
+
+This section records potentially breaking changes to the API or User Experience.
+
+### Version 3.0.0
+
+Destroying a stack now requires user confirmation at the console before the action will be carried out.
