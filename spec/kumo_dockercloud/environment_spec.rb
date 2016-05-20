@@ -29,14 +29,16 @@ describe KumoDockerCloud::Environment do
   end
 
   describe "#apply" do
-    subject { env.apply }
+    subject { env.apply }    
+    let(:stack) { {"#{full_stack_name}": 'stack stuff'} }
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
-      docker_cloud_api = double("DockerCloudApi", stack_by_name: {"#{full_stack_name}": 'stack stuff'})
+      docker_cloud_api = double("DockerCloudApi", stack_by_name: stack)
       allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
       allow_any_instance_of(KumoDockerCloud::StateValidator).to receive(:wait_for_state)
+      allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_return true
     end
 
     it "writes a stack file" do
@@ -85,7 +87,38 @@ describe KumoDockerCloud::Environment do
 
       subject
     end
+
+    context 'with specific service checking passed in' do
+
+      let(:service_checks) { instance_double(KumoDockerCloud::ServiceChecker) } 
+      let(:checkings) { { 'db_migration' => service_checks } }
+
+      subject { env.apply(checkings) }
+
+      it 'returns true when status check is successful' do
+        expect(subject).to be true
+      end
+
+      it 'raise and stack_apply_exception when status check is not successful' do
+
+        allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
+        expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
+      end
+    end
+
+    context 'without specific service checking passed in' do
+      it 'returns true when status check is successful' do
+        expect(subject).to be true
+      end
+
+      it 'raise and stack_apply_exception when status check is not successful' do
+
+        allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
+        expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
+      end
+    end
   end
+
 
 
   describe "#destroy" do

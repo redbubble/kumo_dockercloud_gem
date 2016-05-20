@@ -8,6 +8,7 @@ require_relative 'docker_cloud_api'
 require_relative 'environment_config'
 require_relative 'stack_file'
 require_relative 'state_validator'
+require_relative 'stack_checker'
 
 #TODO refactor this to use the new checker inside Service
 module KumoDockerCloud
@@ -26,7 +27,7 @@ module KumoDockerCloud
       @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
-    def apply
+    def apply(service_checks=nil)
       if @config.image_tag == 'latest'
         puts 'WARNING: Deploying latest. The deployed container version may arbitrarily change'
       end
@@ -38,8 +39,18 @@ module KumoDockerCloud
       run_command("docker-cloud stack redeploy #{stack_name}")
 
       wait_for_running(@timeout)
+      
+      docker_cloud_api = DockerCloudApi.new
+      stack = docker_cloud_api.stack_by_name(stack_name)
+
+      begin
+        StackChecker.new.verify(stack)
+      rescue StackCheckError
+        raise EnvironmentApplyError.new("The stack is not in the expected state.")
+      end
     end
 
+    
     def destroy
       ConsoleJockey.flash_message "Warning! You are about to delete the Docker Cloud Stack #{stack_name}, enter 'yes' to continue."
       return unless ConsoleJockey.get_confirmation(@confirmation_timeout)
