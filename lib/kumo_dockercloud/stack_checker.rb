@@ -7,7 +7,7 @@ module KumoDockerCloud
       @timeout = timeout
     end
 
-    # TODO push stack access to the KumoDockerCloud::Stack object
+    # TODO: push stack access to the KumoDockerCloud::Stack object
     def verify(stack)
       service_check_threads = []
       services = @docker_cloud_api.services_by_stack_name(stack.name)
