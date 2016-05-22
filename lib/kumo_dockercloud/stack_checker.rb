@@ -16,7 +16,6 @@ module KumoDockerCloud
       service_checks = default_checks.merge(@checks)
       begin
         services.each do |service|
-          p service_checks[service.name]
           service_check_threads << Thread.new { ServiceChecker.new(service_checks[service.name], @timeout).verify(service) }
         end
         service_check_threads.each(&:join)

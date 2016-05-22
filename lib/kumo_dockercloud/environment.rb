@@ -39,7 +39,7 @@ module KumoDockerCloud
       run_command("docker-cloud stack redeploy #{stack_name}")
 
       wait_for_running(@timeout)
-      
+
       docker_cloud_api = DockerCloudApi.new
       stack = docker_cloud_api.stack_by_name(stack_name)
 
@@ -50,7 +50,6 @@ module KumoDockerCloud
       end
     end
 
-    
     def destroy
       ConsoleJockey.flash_message "Warning! You are about to delete the Docker Cloud Stack #{stack_name}, enter 'yes' to continue."
       return unless ConsoleJockey.get_confirmation(@confirmation_timeout)
