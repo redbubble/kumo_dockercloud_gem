@@ -1,5 +1,5 @@
 describe KumoDockerCloud::StackChecker do
-  
+
   let(:stack) { double(:stack_api, name: 'stack' )}
   let(:service) { double(:service, name: 'redbubble', state: 'Running') }
   let(:services) { [service]}
@@ -10,18 +10,18 @@ describe KumoDockerCloud::StackChecker do
   let(:specific_service_check) { { "redbubble" => [double(:specific_check)] } }
 
   subject { described_class.new.verify(stack) }
-  
+
   before do
     allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return(docker_cloud_api)
     allow(docker_cloud_api).to receive(:services_by_stack_name).with(stack.name).and_return(services)
   end
-  
+
   describe '#verify' do
 
     before do
         allow(KumoDockerCloud::ServiceChecker).to receive(:new).and_return(service_checker)
     end
-    
+
     context 'single service' do
       context 'without passing services checks' do
         before { allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:default_check).and_return(default_service_check) }
@@ -30,12 +30,12 @@ describe KumoDockerCloud::StackChecker do
         end
 
         it 'uses default check' do
-          
+
           expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(default_service_check, 300)
           subject
         end
 
-        
+
         it 'uses user specify timeout value' do
           user_timeout = 1
           allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:default_check).and_return(default_service_check)
