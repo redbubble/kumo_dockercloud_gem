@@ -6,18 +6,19 @@ module KumoDockerCloud
       @timeout = timeout
     end
 
-    # TODO: push stack access to the KumoDockerCloud::Stack object
     def verify(stack)
       raise InvalidStackError.new("The stack being verified is not a valid KumoDockerCloud::Stack.") unless stack.instance_of? KumoDockerCloud::Stack
-      service_check_threads = []
+
       services = stack.services
+
       default_checks = services.reduce({}) { |result, service| result.merge(service.name => default_check) }
       service_checks = default_checks.merge(@checks)
+
       begin
-        services.each do |service|
-          service_check_threads << Thread.new { ServiceChecker.new(service_checks[service.name], @timeout).verify(service) }
+        service_checker_threads = services.map do |service|
+          Thread.new { ServiceChecker.new(service_checks[service.name], @timeout).verify(service) }
         end
-        service_check_threads.each(&:join)
+        service_checker_threads.each(&:join)
         true
       rescue ServiceDeployError
         raise StackCheckError.new("The stack is not in the expected state.")
