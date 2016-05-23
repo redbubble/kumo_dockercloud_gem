@@ -37,8 +37,6 @@ module KumoDockerCloud
 
       run_command("docker-cloud stack redeploy #{stack_name}")
 
-      wait_for_running(@timeout)
-
       docker_cloud_api = DockerCloudApi.new
       stack = docker_cloud_api.stack_by_name(stack_name)
 
@@ -59,33 +57,6 @@ module KumoDockerCloud
 
     def configure_stack(stack_template)
       StackFile.create_from_template(stack_template, @config, @env_vars)
-    end
-
-    def wait_for_running(timeout)
-      StateValidator.new(stack_state_provider).wait_for_state('Redeploying', timeout)
-      StateValidator.new(stack_state_provider).wait_for_state(expected_state, timeout)
-      StateValidator.new(service_state_provider).wait_for_state('Running', timeout)
-    end
-
-    def expected_state
-      env_name == 'production' ? 'Partly running' : 'Running'
-    end
-
-    def stack_state_provider
-      docker_cloud_api = DockerCloudApi.new
-      lambda {
-        stack = docker_cloud_api.stack_by_name(stack_name)
-        { name: stack.name, state: stack.state }
-      }
-    end
-
-    def service_state_provider
-      docker_cloud_api = DockerCloudApi.new
-      lambda {
-        services = docker_cloud_api.services_by_stack_name(stack_name)
-        services.select! { |service| service.name != 'geckoboardwidget' }
-        { name: 'services', state: services.map { |s| s.state }.uniq.join }
-      }
     end
 
     def run_command(cmd)

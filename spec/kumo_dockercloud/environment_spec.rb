@@ -59,29 +59,6 @@ describe KumoDockerCloud::Environment do
       subject
     end
 
-    describe "waiting for running" do
-      let(:state_validator) { double(KumoDockerCloud::StateValidator, wait_for_state: nil) }
-
-      before do
-        allow(KumoDockerCloud::StateValidator).to receive(:new).exactly(3).times.and_return(state_validator)
-      end
-
-      it "makes sure it waits until it's running" do
-        expect(state_validator).to receive(:wait_for_state).with(anything, 120).exactly(3).times
-        subject
-      end
-
-      context "setting a different timeout value" do
-        let(:params) { {name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path, timeout: 240} }
-
-        it "sends the timeout value to the StateValidator" do
-          expect(state_validator).to receive(:wait_for_state).with(anything, 240).exactly(3).times
-          subject
-        end
-      end
-
-    end
-
     it 'uses the StackFile class' do
       expect(KumoDockerCloud::StackFile).to receive(:create_from_template).with(File.read(stack_template_path), config, env_vars)
 
@@ -99,7 +76,8 @@ describe KumoDockerCloud::Environment do
         expect(subject).to be true
       end
 
-      it 'raises a stack_apply_exception when status check is not successful' do
+      it 'raise and stack_apply_exception when status check is not successful' do
+
         allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end
@@ -110,8 +88,7 @@ describe KumoDockerCloud::Environment do
         expect(subject).to be true
       end
 
-      it 'raise and stack_apply_exception when status check is not successful' do
-
+      it 'raises a stack_apply_exception when status check is not successful' do
         allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end
