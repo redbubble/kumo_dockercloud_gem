@@ -88,19 +88,18 @@ describe KumoDockerCloud::Environment do
       subject
     end
 
-    context 'with specific service checking passed in' do
+    context 'with specific service checks passed in' do
 
       let(:service_checks) { instance_double(KumoDockerCloud::ServiceChecker) }
-      let(:checkings) { { 'db_migration' => service_checks } }
+      let(:checks) { { 'db_migration' => service_checks } }
 
-      subject { env.apply(checkings) }
+      subject { env.apply(checks) }
 
       it 'returns true when status check is successful' do
         expect(subject).to be true
       end
 
-      it 'raise and stack_apply_exception when status check is not successful' do
-
+      it 'raises a stack_apply_exception when status check is not successful' do
         allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end

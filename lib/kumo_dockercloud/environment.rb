@@ -10,7 +10,6 @@ require_relative 'stack_file'
 require_relative 'state_validator'
 require_relative 'stack_checker'
 
-#TODO refactor this to use the new checker inside Service
 module KumoDockerCloud
   class Environment
     extend ::Forwardable
@@ -29,7 +28,7 @@ module KumoDockerCloud
 
     def apply(service_checks=nil)
       if @config.image_tag == 'latest'
-        puts 'WARNING: Deploying latest. The deployed container version may arbitrarily change'
+        ConsoleJockey.write_line 'WARNING: Deploying latest. The deployed container version may arbitrarily change'
       end
 
       stack_file = write_stack_config_file(configure_stack(stack_template))
