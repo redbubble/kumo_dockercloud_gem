@@ -50,11 +50,11 @@ describe KumoDockerCloud::StackChecker do
         end
       end
 
-      context 'with user specifiy default services checks' do
-        it 'uses user specify default check' do
-          user_specify_default_check = double(:user_specify_default_check)
-          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(user_specify_default_check,300)
-          described_class.new({}, user_specify_default_check).verify(stack)
+      context 'with user specified common checks' do
+        it 'uses user specified common check as the default' do
+          common_checks = [double(:common_check)]
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(common_checks, 300)
+          described_class.new({}, common_checks).verify(stack)
         end
       end
 
@@ -97,7 +97,6 @@ describe KumoDockerCloud::StackChecker do
         end
 
         it 'uses default checking if one of the service check is not provided' do
-
           expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
           expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(default_service_check, 300)
           described_class.new(single_override_service_check).verify(stack)
@@ -109,7 +108,7 @@ describe KumoDockerCloud::StackChecker do
         let(:common_service_checks) { [double(:common_service_check)] }
         subject { described_class.new(specific_service_check, common_service_checks).verify(stack) }
 
-        it 'overrides the default check with the common checks' do
+        it 'overrides the default check with the common checks for non-specified services' do
           expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
           expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(common_service_checks, 300)
           subject
