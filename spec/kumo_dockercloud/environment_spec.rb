@@ -65,44 +65,28 @@ describe KumoDockerCloud::Environment do
       subject
     end
 
-    context 'with specific service checks passed in' do
-
-      let(:service_checks) { instance_double(KumoDockerCloud::ServiceChecker) }
-      let(:checks) { { 'db_migration' => service_checks } }
-      let(:stack_checker) { instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true ) }
-      subject { env.apply(checks) }
+    context 'with specific stack checker passed in' do
+      let(:stack_checker_passed_in) { instance_double(KumoDockerCloud::StackChecker, :passed_in_stack_checker, verify: true) }
+      subject { env.apply(stack_checker_passed_in) }
 
       it 'returns true when status check is successful' do
         expect(subject).to be true
       end
 
       it 'raise and stack_apply_exception when status check is not successful' do
-
-        allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
+        expect(stack_checker_passed_in).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end
 
-      context 'with specific timeout passed in' do
-        let(:timeout) { 10 }
-
-        subject { env.apply(checks, nil, timeout) }
-        it 'uses the user passed in timeout' do
-          expect(KumoDockerCloud::StackChecker).to receive(:new).with(checks, nil, timeout).and_return(stack_checker)
-          subject
-        end
-      end
-
-      context 'with specific common checks passed in' do
-        let(:common_checks) { [instance_double(KumoDockerCloud::ServiceChecker)] }
-        subject { env.apply(checks, common_checks) }
-        it 'uses the user specified common checks' do
-          expect(KumoDockerCloud::StackChecker).to receive(:new).with(checks, common_checks, 300).and_return(stack_checker)
-          subject
-        end
+      it 'uses the user passed in stack checker' do
+        expect(stack_checker_passed_in).to receive(:verify).with(stack).and_return(true)
+        subject
       end
     end
 
-    context 'without specific service checking passed in' do
+    context 'without specific stack checker passed in' do
+      let(:stack_checker) { instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true ) }
+      subject { env.apply }
       it 'returns true when status check is successful' do
         expect(subject).to be true
       end
@@ -111,6 +95,12 @@ describe KumoDockerCloud::Environment do
         allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end
+
+      it 'does create a new instance of stack checker' do
+        expect(KumoDockerCloud::StackChecker).to receive(:new).and_return(stack_checker)
+        subject
+      end
+
     end
   end
 
