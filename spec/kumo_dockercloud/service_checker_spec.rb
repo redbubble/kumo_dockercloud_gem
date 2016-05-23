@@ -56,7 +56,7 @@ describe KumoDockerCloud::ServiceChecker do
 
     context "second time is the charm" do
       let(:mutating_state) { [] }
-      let(:mutating_check) { lambda { |container| mutating_state << 1; mutating_state.size > 1 } }
+      let(:mutating_check) { lambda { |_container| mutating_state << 1; mutating_state.size > 1 } }
       let(:checks) { [mutating_check] }
 
       it "runs without incident" do
