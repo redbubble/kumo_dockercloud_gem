@@ -43,7 +43,7 @@ module KumoDockerCloud
       stack = docker_cloud_api.stack_by_name(stack_name)
 
       begin
-        StackChecker.new.verify(stack)
+        StackChecker.new(service_checks).verify(stack)
       rescue StackCheckError
         raise EnvironmentApplyError.new("The stack is not in the expected state.")
       end
