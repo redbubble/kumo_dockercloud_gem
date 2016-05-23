@@ -87,19 +87,33 @@ describe KumoDockerCloud::StackChecker do
 
       subject { described_class.new(specific_service_check).verify(stack) }
 
-      before { allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:default_check).and_return(default_service_check)  }
+      context 'default checks' do
+        before { allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:default_check).and_return(default_service_check)  }
 
-      it 'does the correct checking for each service' do
-        expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
-        expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([nginx_check], 300)
-        subject
+        it 'does the correct checking for each service' do
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([nginx_check], 300)
+          subject
+        end
+
+        it 'uses default checking if one of the service check is not provided' do
+
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(default_service_check, 300)
+          described_class.new(single_override_service_check).verify(stack)
+        end
       end
 
-      it 'uses default checking if one of the service check is not provided' do
+      context 'passing common checks' do
+        let(:specific_service_check) { { "redbubble" => [redbubble_check] } }
+        let(:common_service_checks) { [double(:common_service_check)] }
+        subject { described_class.new(specific_service_check, common_service_checks).verify(stack) }
 
-        expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
-        expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(default_service_check, 300)
-        described_class.new(single_override_service_check).verify(stack)
+        it 'overrides the default check with the common checks' do
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([redbubble_check], 300)
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(common_service_checks, 300)
+          subject
+        end
       end
     end
   end
