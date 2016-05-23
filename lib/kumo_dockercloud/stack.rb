@@ -19,13 +19,8 @@ module KumoDockerCloud
     end
 
     def services
-      services = []
-      docker_cloud_api = DockerCloudApi.new
-      docker_services = docker_cloud_api.services_by_stack_name(stack_name)
-      docker_services.each do |service|
-        services << Service.new(stack_name, service.name)
-      end
-      services
+      services = docker_cloud_api.services_by_stack_name(stack_name)
+      services.map { |service| Service.new(stack_name, service.name) }
     end
 
     def deploy_blue_green(options)
@@ -57,6 +52,10 @@ module KumoDockerCloud
     def validate_params(param_value, param_name)
       raise KumoDockerCloud::Error.new("#{param_name} cannot be nil") unless param_value
       raise KumoDockerCloud::Error.new("#{param_name} cannot be empty") if param_value.empty?
+    end
+
+    def docker_cloud_api
+      @docker_cloud_api ||= DockerCloudApi.new
     end
   end
 end

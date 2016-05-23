@@ -152,6 +152,5 @@ describe KumoDockerCloud::Stack do
     it 'returns the correct type of services' do
       expect(subject).to eq([redbubble_service])
     end
-
   end
 end
