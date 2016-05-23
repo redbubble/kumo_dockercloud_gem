@@ -69,7 +69,7 @@ describe KumoDockerCloud::Environment do
 
       let(:service_checks) { instance_double(KumoDockerCloud::ServiceChecker) }
       let(:checks) { { 'db_migration' => service_checks } }
-
+      let(:stack_checker) { instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true ) }
       subject { env.apply(checks) }
 
       it 'returns true when status check is successful' do
@@ -85,9 +85,18 @@ describe KumoDockerCloud::Environment do
       context 'with specific timeout passed in' do
         let(:timeout) { 10 }
 
-        subject { env.apply(checks, timeout) }
+        subject { env.apply(checks, nil, timeout) }
         it 'uses the user passed in timeout' do
-          expect(KumoDockerCloud::StackChecker).to receive(:new).with(checks, nil, timeout).and_return(instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true ))
+          expect(KumoDockerCloud::StackChecker).to receive(:new).with(checks, nil, timeout).and_return(stack_checker)
+          subject
+        end
+      end
+
+      context 'with specific common checks passed in' do
+        let(:common_checks) { [instance_double(KumoDockerCloud::ServiceChecker)] }
+        subject { env.apply(checks, common_checks) }
+        it 'uses the user specified common checks' do
+          expect(KumoDockerCloud::StackChecker).to receive(:new).with(checks, common_checks, 300).and_return(stack_checker)
           subject
         end
       end
