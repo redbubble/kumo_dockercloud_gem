@@ -22,8 +22,8 @@ module KumoDockerCloud
       @timeout = params.fetch(:timeout, 120)
       @confirmation_timeout = params.fetch(:confirmation_timeout, 30)
 
-      app_name = params.fetch(:app_name)
-      @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
+      @app_name = params.fetch(:app_name)
+      @config = EnvironmentConfig.new(app_name: @app_name, env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
     def apply(stack_checker = StackChecker.new)
@@ -37,8 +37,7 @@ module KumoDockerCloud
 
       run_command("docker-cloud stack redeploy #{stack_name}")
 
-      docker_cloud_api = DockerCloudApi.new
-      stack = docker_cloud_api.stack_by_name(stack_name)
+      stack = Stack.new(@app_name, @env_name)
 
       begin
         stack_checker.verify(stack)

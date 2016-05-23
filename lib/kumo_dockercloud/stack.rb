@@ -18,6 +18,16 @@ module KumoDockerCloud
       checker.verify(service)
     end
 
+    def services
+      services = []
+      docker_cloud_api = DockerCloudApi.new
+      docker_services = docker_cloud_api.services_by_stack_name(stack_name)
+      docker_services.each do |service|
+        services << Service.new(stack_name, service.name)
+      end
+      services
+    end
+
     def deploy_blue_green(options)
       service_names = options[:service_names]
       version = options[:version]

@@ -1,7 +1,8 @@
 describe KumoDockerCloud::Environment do
   let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:app_name) { 'application-stack-name' }
-  let(:config) { KumoDockerCloud::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
+  let(:env_name) { 'test' }
+  let(:config) { KumoDockerCloud::EnvironmentConfig.new(app_name: app_name, env_name: env_name, config_path: 'a path') }
 
   let(:stack_file) {
     {
@@ -19,7 +20,7 @@ describe KumoDockerCloud::Environment do
   let(:confirmation_timeout) { 0.5 }
   let(:stack_template_path) { File.join(__dir__, '../fixtures/stack.yml.erb') }
 
-  let(:params) { {name: 'test', env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path, confirmation_timeout: confirmation_timeout} }
+  let(:params) { {name: env_name, env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path, confirmation_timeout: confirmation_timeout} }
 
   subject(:env) { described_class.new(params) }
 
@@ -31,14 +32,14 @@ describe KumoDockerCloud::Environment do
   describe "#apply" do
     subject { env.apply }
     let(:stack) { {"#{full_stack_name}" => 'stack stuff'} }
+    let(:stack_checker) { instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true) }
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
-      docker_cloud_api = double("DockerCloudApi", stack_by_name: stack)
-      allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
-      allow_any_instance_of(KumoDockerCloud::StateValidator).to receive(:wait_for_state)
-      allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_return true
+      allow(KumoDockerCloud::StackChecker).to receive(:new).and_return(stack_checker)
+      allow(KumoDockerCloud::Stack).to receive(:new).with(app_name, env_name).and_return(stack)
+
     end
 
     it "writes a stack file" do
@@ -65,6 +66,12 @@ describe KumoDockerCloud::Environment do
       subject
     end
 
+    it 'passs a KumoDockerCloud::Stack to the stack_checker' do
+      expect(stack_checker).to receive(:verify).with(stack).and_return(true)
+
+      subject
+    end
+
     context 'with specific stack checker passed in' do
       let(:stack_checker_passed_in) { instance_double(KumoDockerCloud::StackChecker, :passed_in_stack_checker, verify: true) }
       subject { env.apply(stack_checker_passed_in) }
@@ -85,14 +92,13 @@ describe KumoDockerCloud::Environment do
     end
 
     context 'without specific stack checker passed in' do
-      let(:stack_checker) { instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true ) }
       subject { env.apply }
       it 'returns true when status check is successful' do
         expect(subject).to be true
       end
 
       it 'raises a stack_apply_exception when status check is not successful' do
-        allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
+        expect(stack_checker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end
 

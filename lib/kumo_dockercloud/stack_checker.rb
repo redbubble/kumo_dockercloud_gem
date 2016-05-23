@@ -3,15 +3,13 @@ module KumoDockerCloud
     def initialize(specific_checks = {}, common_check = nil, timeout = 300)
       @checks = specific_checks
       @default_check = common_check
-      @docker_cloud_api = DockerCloudApi.new
       @timeout = timeout
     end
 
     # TODO: push stack access to the KumoDockerCloud::Stack object
     def verify(stack)
       service_check_threads = []
-      services = @docker_cloud_api.services_by_stack_name(stack.name)
-
+      services = stack.services
       default_checks = services.reduce({}) { |result, service| result.merge(service.name => default_check) }
       service_checks = default_checks.merge(@checks)
       begin

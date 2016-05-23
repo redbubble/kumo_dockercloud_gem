@@ -4,7 +4,6 @@ describe KumoDockerCloud::StackChecker do
   let(:service) { double(:service, name: 'redbubble', state: 'Running') }
   let(:services) { [service]}
   let(:failed_services) { double(:service_api, name: 'redbubble', state: 'Stopped')}
-  let(:docker_cloud_api) { instance_double(KumoDockerCloud::DockerCloudApi)}
   let(:service_checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil)}
   let(:default_service_check) { [double(:default_check)] }
   let(:specific_service_check) { { "redbubble" => [double(:specific_check)] } }
@@ -12,8 +11,7 @@ describe KumoDockerCloud::StackChecker do
   subject { described_class.new.verify(stack) }
 
   before do
-    allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return(docker_cloud_api)
-    allow(docker_cloud_api).to receive(:services_by_stack_name).with(stack.name).and_return(services)
+    allow(stack).to receive(:services).and_return(services)
   end
 
   describe '#verify' do
@@ -30,7 +28,6 @@ describe KumoDockerCloud::StackChecker do
         end
 
         it 'uses default check' do
-
           expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(default_service_check, 300)
           subject
         end
@@ -45,7 +42,6 @@ describe KumoDockerCloud::StackChecker do
 
         it 'raise StackCheckError when verify unsuccessful' do
           allow(service_checker).to receive(:verify).with(service).and_raise KumoDockerCloud::ServiceDeployError
-          allow(docker_cloud_api).to receive(:services_by_stack_name).with(stack.name).and_return(services)
           expect {subject}.to raise_error(KumoDockerCloud::StackCheckError, "The stack is not in the expected state." )
         end
       end
@@ -67,7 +63,6 @@ describe KumoDockerCloud::StackChecker do
 
         it 'raise StackCheckError when verify unsuccessful' do
           allow(service_checker).to receive(:verify).with(service).and_raise KumoDockerCloud::ServiceDeployError
-          allow(docker_cloud_api).to receive(:services_by_stack_name).with(stack.name).and_return(services)
           expect {subject}.to raise_error(KumoDockerCloud::StackCheckError, "The stack is not in the expected state." )
         end
 
