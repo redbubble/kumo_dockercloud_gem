@@ -5,7 +5,7 @@ describe KumoDockerCloud::Environment do
 
   let(:stack_file) {
     {
-      'application-stack-name': {
+      'application-stack-name' => {
         image: 'a-thing',
         environment: {
           TEST_ENV: 'FAKE',
@@ -29,8 +29,8 @@ describe KumoDockerCloud::Environment do
   end
 
   describe "#apply" do
-    subject { env.apply }    
-    let(:stack) { {"#{full_stack_name}": 'stack stuff'} }
+    subject { env.apply }
+    let(:stack) { {"#{full_stack_name}" => 'stack stuff'} }
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
@@ -90,7 +90,7 @@ describe KumoDockerCloud::Environment do
 
     context 'with specific service checking passed in' do
 
-      let(:service_checks) { instance_double(KumoDockerCloud::ServiceChecker) } 
+      let(:service_checks) { instance_double(KumoDockerCloud::ServiceChecker) }
       let(:checkings) { { 'db_migration' => service_checks } }
 
       subject { env.apply(checkings) }
