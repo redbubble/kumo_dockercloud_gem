@@ -81,6 +81,16 @@ describe KumoDockerCloud::Environment do
         allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:verify).with(stack).and_raise(KumoDockerCloud::StackCheckError)
         expect{subject}.to raise_error(KumoDockerCloud::EnvironmentApplyError, "The stack is not in the expected state." )
       end
+
+      context 'with specific timeout passed in' do
+        let(:timeout) { 10 }
+
+        subject { env.apply(checks, timeout) }
+        it 'uses the user passed in timeout' do
+          expect(KumoDockerCloud::StackChecker).to receive(:new).with(checks, nil, timeout).and_return(instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true ))
+          subject
+        end
+      end
     end
 
     context 'without specific service checking passed in' do

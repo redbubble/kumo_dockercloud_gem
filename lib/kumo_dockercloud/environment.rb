@@ -26,7 +26,7 @@ module KumoDockerCloud
       @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
-    def apply(service_checks=nil)
+    def apply(service_checks=nil, timeout = 300)
       if @config.image_tag == 'latest'
         ConsoleJockey.write_line 'WARNING: Deploying latest. The deployed container version may arbitrarily change'
       end
@@ -41,7 +41,7 @@ module KumoDockerCloud
       stack = docker_cloud_api.stack_by_name(stack_name)
 
       begin
-        StackChecker.new(service_checks).verify(stack)
+        StackChecker.new(service_checks, nil, timeout).verify(stack)
       rescue StackCheckError
         raise EnvironmentApplyError.new("The stack is not in the expected state.")
       end
