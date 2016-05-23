@@ -1,6 +1,6 @@
 describe KumoDockerCloud::StackChecker do
 
-  let(:stack) { double(:stack_api, name: 'stack' )}
+  let(:stack) { instance_double(KumoDockerCloud::Stack, :stack, stack_name: 'stack' )}
   let(:service) { double(:service, name: 'redbubble', state: 'Running') }
   let(:services) { [service]}
   let(:failed_services) { double(:service_api, name: 'redbubble', state: 'Stopped')}
@@ -12,6 +12,7 @@ describe KumoDockerCloud::StackChecker do
 
   before do
     allow(stack).to receive(:services).and_return(services)
+    allow(stack).to receive(:instance_of?).with(KumoDockerCloud::Stack).and_return(true)
   end
 
   describe '#verify' do
@@ -19,6 +20,16 @@ describe KumoDockerCloud::StackChecker do
     before do
         allow(KumoDockerCloud::ServiceChecker).to receive(:new).and_return(service_checker)
     end
+
+    context 'invalid stack passed in' do
+      let(:invalid_stack) { double(:stack) }
+      subject{ described_class.new.verify(invalid_stack) }
+
+      it 'raises invalid stack exception when received a non KumoDockerCloud::Stack' do
+        expect { subject }.to raise_error( KumoDockerCloud::InvalidStackError, "The stack being verified is not a valid KumoDockerCloud::Stack." )
+      end
+    end
+
 
     context 'single service' do
       context 'without passing services checks' do

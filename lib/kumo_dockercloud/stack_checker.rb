@@ -8,6 +8,7 @@ module KumoDockerCloud
 
     # TODO: push stack access to the KumoDockerCloud::Stack object
     def verify(stack)
+      raise InvalidStackError.new("The stack being verified is not a valid KumoDockerCloud::Stack.") unless stack.instance_of? KumoDockerCloud::Stack
       service_check_threads = []
       services = stack.services
       default_checks = services.reduce({}) { |result, service| result.merge(service.name => default_check) }
