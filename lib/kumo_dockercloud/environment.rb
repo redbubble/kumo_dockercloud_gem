@@ -8,8 +8,8 @@ require_relative 'docker_cloud_api'
 require_relative 'environment_config'
 require_relative 'stack_file'
 require_relative 'state_validator'
+require_relative 'stack_checker'
 
-#TODO refactor this to use the new checker inside Service
 module KumoDockerCloud
   class Environment
     extend ::Forwardable
@@ -22,13 +22,13 @@ module KumoDockerCloud
       @timeout = params.fetch(:timeout, 120)
       @confirmation_timeout = params.fetch(:confirmation_timeout, 30)
 
-      app_name = params.fetch(:app_name)
-      @config = EnvironmentConfig.new(app_name: app_name, env_name: @env_name, config_path: params.fetch(:config_path))
+      @app_name = params.fetch(:app_name)
+      @config = EnvironmentConfig.new(app_name: @app_name, env_name: @env_name, config_path: params.fetch(:config_path))
     end
 
-    def apply
+    def apply(stack_checker = StackChecker.new)
       if @config.image_tag == 'latest'
-        puts 'WARNING: Deploying latest. The deployed container version may arbitrarily change'
+        ConsoleJockey.write_line 'WARNING: Deploying latest. The deployed container version may arbitrarily change'
       end
 
       stack_file = write_stack_config_file(configure_stack(stack_template))
@@ -37,7 +37,13 @@ module KumoDockerCloud
 
       run_command("docker-cloud stack redeploy #{stack_name}")
 
-      wait_for_running(@timeout)
+      stack = Stack.new(@app_name, @env_name)
+
+      begin
+        stack_checker.verify(stack)
+      rescue StackCheckError
+        raise EnvironmentApplyError.new("The stack is not in the expected state.")
+      end
     end
 
     def destroy
@@ -50,33 +56,6 @@ module KumoDockerCloud
 
     def configure_stack(stack_template)
       StackFile.create_from_template(stack_template, @config, @env_vars)
-    end
-
-    def wait_for_running(timeout)
-      StateValidator.new(stack_state_provider).wait_for_state('Redeploying', timeout)
-      StateValidator.new(stack_state_provider).wait_for_state(expected_state, timeout)
-      StateValidator.new(service_state_provider).wait_for_state('Running', timeout)
-    end
-
-    def expected_state
-      env_name == 'production' ? 'Partly running' : 'Running'
-    end
-
-    def stack_state_provider
-      docker_cloud_api = DockerCloudApi.new
-      lambda {
-        stack = docker_cloud_api.stack_by_name(stack_name)
-        { name: stack.name, state: stack.state }
-      }
-    end
-
-    def service_state_provider
-      docker_cloud_api = DockerCloudApi.new
-      lambda {
-        services = docker_cloud_api.services_by_stack_name(stack_name)
-        services.select! { |service| service.name != 'geckoboardwidget' }
-        { name: 'services', state: services.map { |s| s.state }.uniq.join }
-      }
     end
 
     def run_command(cmd)
