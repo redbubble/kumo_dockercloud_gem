@@ -18,7 +18,7 @@ module KumoDockerCloud
       api.on(:close, &handler.on_close)
 
       api.run!
-      @acc_data
+      handler.data
     end
   end
 end
