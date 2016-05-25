@@ -5,8 +5,10 @@ describe KumoDockerCloud::HaproxyCommand do
     let(:command) { 'enable' }
     let(:dc_client) { double(:dc_client, headers: nil)}
     let(:container_id) { 'id' }
-    let(:api) { double(DockerCloud::ContainerStreamAPI, on: nil, run!: nil)}
+    let(:api) { instance_double(DockerCloud::ContainerStreamAPI, on: nil, run!: nil)}
     let(:cmd) { %(sh -c "echo #{command} | nc -U /var/run/haproxy.stats") }
+    let(:handler) { KumoDockerCloud::HaproxyEventHandler.new }
+
 
     subject { described_class.new(container_id, dc_client).execute(command) }
 
@@ -19,11 +21,14 @@ describe KumoDockerCloud::HaproxyCommand do
       allow(DockerCloud::ContainerStreamAPI).to receive(:new).with(container_id, cmd, dc_client.headers, dc_client).and_return(api)
     end
 
-    [:open, :message, :error, :close].each do |event|
-      it "configures an on(#{event}) handler" do
-        expect(api).to receive(:on).with(event)
-        subject
-      end
+    it 'configures the callback handlers' do
+      allow(KumoDockerCloud::HaproxyEventHandler).to receive(:new).and_return(handler)
+
+      expect(api).to receive(:on).with(:open)
+      expect(api).to receive(:on).with(:message)
+      expect(api).to receive(:on).with(:error)
+      expect(api).to receive(:on).with(:close)
+      subject
     end
 
     it 'runs the event machine' do
