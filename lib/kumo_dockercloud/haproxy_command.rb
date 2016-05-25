@@ -5,7 +5,6 @@ module KumoDockerCloud
     def initialize(container_id, dc_client)
       @container_id = container_id
       @dc_client = dc_client
-
     end
 
     def execute(command)
