@@ -35,5 +35,11 @@ describe KumoDockerCloud::HaproxyCommand do
       expect(api).to receive(:run!)
       subject
     end
+
+    it 'returns the data from the callback handler' do
+      allow(KumoDockerCloud::HaproxyEventHandler).to receive(:new).and_return(handler)
+      expect(handler).to receive(:data)
+      subject
+    end
   end
 end
