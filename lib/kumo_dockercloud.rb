@@ -1,6 +1,7 @@
 require 'kumo_dockercloud/environment'
 require 'kumo_dockercloud/deployment'
 require 'kumo_dockercloud/stack'
+require 'kumo_dockercloud/stack_checker'
 require 'kumo_dockercloud/service'
 require 'kumo_dockercloud/service_checker'
 require 'kumo_dockercloud/errors'

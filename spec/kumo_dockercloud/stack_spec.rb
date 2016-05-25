@@ -138,4 +138,19 @@ describe KumoDockerCloud::Stack do
       subject
     end
   end
+
+  describe '#services' do
+    subject { stack.services }
+    let(:docker_cloud_services) { [double(:docker_cloud_service, name: 'redbubble')]}
+    let(:redbubble_service) { instance_double(KumoDockerCloud::Service, :service)}
+    let(:docker_cloud_api) { double("DockerCloudApi", services_by_stack_name: docker_cloud_services)}
+    before do
+      allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
+      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, 'redbubble').and_return(redbubble_service)
+    end
+
+    it 'returns the correct type of services' do
+      expect(subject).to eq([redbubble_service])
+    end
+  end
 end
