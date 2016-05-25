@@ -1,47 +1,42 @@
 require 'spec_helper'
-require 'em-websocket'
 
 describe KumoDockerCloud::Haproxy do
-  let(:fake_server) do
-    EventMachine.run do
-      EM::WebSocket.start(:host => '0.0.0.0', :port => '3001') do |ws|
-        EM.add_timer(1) { puts "stopping server" ; EventMachine.stop }
+  subject { KumoDockerCloud::Haproxy.new('container_id', 'dc_user', 'dc_key') }
 
-        ws.onopen { |handshake| ws.send "Opened." }
-        ws.onclose { ws.send "Closed." }
-        ws.onmessage { |msg| puts "Received Message: #{msg}" }
-        ws.onerror { |error| raise StandardError.new(error.message) }
-      end
-    end
+  let(:haproxy_command) { instance_double(KumoDockerCloud::HaproxyCommand, :haproxy_command )}
+  let(:csv_output) { 'a,b\n1,2' }
+  before do
+    allow(KumoDockerCloud::HaproxyCommand).to receive(:new).and_return(haproxy_command)
   end
 
-  #TODO: Refactor out the
-  #      Inject the server into docker-cloud
   describe '#stats' do
-    subject { KumoDockerCloud::Haproxy.new('container_id', 'dc_user', 'dc_key') }
-    let(:url) { 'ws://localhost:3001' }
-    let(:fake_dc_client) { instance_double(DockerCloud::Client, headers: {}) }
+    it 'uses haproxy_command to do the execution' do
+      expect(haproxy_command).to receive(:execute).with('show stat').and_return(csv_output)
+      subject.stats
+    end
 
-    context 'socket error' do
-      it 'works' do
-        EM.run do
-          EM.add_timer(1) { puts "stopping client" ; EventMachine.stop }
-          ws = Faye::WebSocket::Client.new('ws://0.0.0.0:3001', nil, ping: 20, headers: {})
-          ws.on(:error) { |event| p "error: #{event.message}" }
-          allow(Faye::WebSocket::Client).to receive(:new).and_return(ws)
-          expect do
-            require 'pry-byebug'; binding.pry
-            subject.stats
-          end.to raise_error(KumoDockerCloud::HaproxySocketError, 'What ever')
-        end
-      end
+    it 'parses the output as CSV' do
+      allow(haproxy_command).to receive(:execute).with('show stat').and_return(csv_output)
+      expect(CSV).to receive(:parse).with(csv_output, headers: true)
+      subject.stats
     end
   end
 
   describe '#disable_server' do
+    let(:server_name) { 'green_server' }
+
+    it 'runs disable server' do
+      expect(haproxy_command).to receive(:execute).with("disable server #{server_name}")
+      subject.disable_server(server_name)
+    end
   end
 
   describe '#enable_server' do
+    let(:server_name) { 'blue_server' }
 
+    it 'runs enable server' do
+      expect(haproxy_command).to receive(:execute).with("enable server #{server_name}")
+      subject.enable_server(server_name)
+    end
   end
 end
