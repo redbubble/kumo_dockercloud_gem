@@ -33,17 +33,25 @@ module KumoDockerCloud
       validate_params(service_names, "Service names")
       validate_params(switching_service_name, "Switching service name")
 
-      switching_service = Service.new(stack_name, switching_service_name)
-      link = switching_service.links.find { |link| service_names.include?(Service.service_by_resource_uri(link[:to_service]).name) }
-      active_service = Service.service_by_resource_uri(link[:to_service])
+      # switching_service = Service.new(stack_name, switching_service_name)
+      # link = switching_service.links.find { |link| service_names.include?(Service.service_by_resource_uri(link[:to_service]).name) }
+      # active_service = Service.service_by_resource_uri(link[:to_service])
 
+      # TODO: We are here!
+      active_services = services.select { |s| service_names.include? s.name && s.state == 'Running' }
+
+      # TODO: Pull out uuid of haproxy container
       inactive_service_name = service_names.find { |name| name != active_service.name }
       inactive_service = Service.new(stack_name, inactive_service_name)
 
       inactive_service.deploy(version)
       checker.verify(inactive_service)
 
-      switching_service.set_link(inactive_service, link[:name])
+      # TODO: Create KumoDockerCloud::Haproxy to perform the following:
+      # TODO: loop until haproxy indicates that our inactive service is up
+      # TODO: trigger haproxy connection draining on active service
+      # TODO: wait for last connection to active service is > 3.0 seconds (or something)
+
       active_service.stop
     end
 
