@@ -1,3 +1,5 @@
+require 'timeout'
+
 module KumoDockerCloud
   class Stack
     attr_reader :stack_name, :app_name, :options
@@ -23,32 +25,45 @@ module KumoDockerCloud
       services.map { |service| Service.new(stack_name, service.name) }
     end
 
-    def deploy_blue_green(options)
-      service_names = options[:service_names]
-      version = options[:version]
-      checker = options[:checker] || ServiceChecker.new
-      switching_service_name = options[:switching_service_name]
-
+    def deploy_blue_green(service_names, version, checker = ServiceChecker.new)
       validate_params(version, "Version")
       validate_params(service_names, "Service names")
-      validate_params(switching_service_name, "Switching service name")
 
-      # switching_service = Service.new(stack_name, switching_service_name)
-      # link = switching_service.links.find { |link| service_names.include?(Service.service_by_resource_uri(link[:to_service]).name) }
-      # active_service = Service.service_by_resource_uri(link[:to_service])
+      puts "Service looks like: #{services.first.methods - methods}"
 
-      # TODO: We are here!
-      active_services = services.select { |s| service_names.include? s.name && s.state == 'Running' }
+      all_services = services
+      all_services.each do |service|
+        puts "#{service.name} is currently #{service.state}"
+      end
+      active_service = all_services.select { |s| service_names.include?(s.name) && s.state == 'Running' }.first
+      puts "Active server is: #{active_service.name}"
 
-      # TODO: Pull out uuid of haproxy container
+      haproxy_service = all_services.find { |s| s.name == 'haproxy' }
+
       inactive_service_name = service_names.find { |name| name != active_service.name }
       inactive_service = Service.new(stack_name, inactive_service_name)
 
-      inactive_service.deploy(version)
-      checker.verify(inactive_service)
+      puts "Inactive server is: #{inactive_service.name}"
 
-      # TODO: Create KumoDockerCloud::Haproxy to perform the following:
-      # TODO: loop until haproxy indicates that our inactive service is up
+      # inactive_service.deploy(version)
+      # checker.verify(inactive_service)
+
+      haproxy = Haproxy.new(haproxy_service.uuid)
+      puts "#{haproxy.stats}"
+
+      # loop until haproxy indicates that our inactive service is up
+      continue = false
+      Timeout::timeout(30) {
+        until(continue) do
+          stats = haproxy.stats
+          record = stats.find { | rec | rec['# pxrec'].downcase.start_with? inactive_service.downcase }
+          continue = record['status'] == 'up'
+          sleep 1
+        end
+      }
+
+
+
       # TODO: trigger haproxy connection draining on active service
       # TODO: wait for last connection to active service is > 3.0 seconds (or something)
 

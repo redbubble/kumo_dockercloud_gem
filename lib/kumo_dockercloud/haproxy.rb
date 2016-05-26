@@ -2,7 +2,7 @@ require 'csv'
 
 module KumoDockerCloud
   class Haproxy
-    def initialize(container_id, dc_user, dc_key)
+    def initialize(container_id, dc_user = ENV['DOCKERCLOUD_USER'], dc_key = ENV['DOCKERCLOUD_APIKEY'])
       @container_id = container_id
       @client = DockerCloud::Client.new(dc_user, dc_key)
     end

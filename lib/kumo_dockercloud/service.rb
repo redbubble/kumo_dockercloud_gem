@@ -56,6 +56,10 @@ module KumoDockerCloud
       get_service.containers
     end
 
+    def uuid
+      get_service.uuid
+    end
+
     private
     attr_reader :stack_name
 
@@ -77,10 +81,6 @@ module KumoDockerCloud
 
     def get_service
       docker_cloud_api.service_by_stack_and_service_name(stack_name, name)
-    end
-
-    def uuid
-      get_service.uuid
     end
 
     def image_name
