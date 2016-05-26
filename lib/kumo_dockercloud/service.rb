@@ -30,6 +30,10 @@ module KumoDockerCloud
       get_service.linked_to_service
     end
 
+    def state
+      get_service.state
+    end
+
     def set_link(service_to_link, link_internal_name)
       linked_service = {
         to_service: service_to_link.resource_uri,
