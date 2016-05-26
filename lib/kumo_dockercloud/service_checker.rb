@@ -1,3 +1,5 @@
+require_relative 'console_jockey'
+
 module KumoDockerCloud
   class ServiceChecker
     attr_reader :checks, :timeout, :quiet_time
@@ -12,7 +14,7 @@ module KumoDockerCloud
       Timeout::timeout(timeout) do
 
         while any_check_failing?(service)
-          print '.'
+          ConsoleJockey.write_char '.'
           sleep(quiet_time)
         end
 

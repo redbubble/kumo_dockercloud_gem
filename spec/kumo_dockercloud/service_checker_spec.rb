@@ -23,14 +23,20 @@ describe KumoDockerCloud::ServiceChecker do
     let(:container) { double(:my_container) }
     let(:containers) { [container, container] }
     let(:service) { instance_double(KumoDockerCloud::Service, containers: containers) }
-    let(:timeout) { 5 }
+    let(:timeout) { 0.5 }
+    let(:quiet_time) { 0.1 }
+
+    subject { described_class.new(checks, timeout, quiet_time).verify(service) }
+
+    before do
+      allow(KumoDockerCloud::ConsoleJockey).to receive(:write_char).and_return(nil)
+    end
 
     context 'passing ServiceCheck objects' do
       let(:check) { KumoDockerCloud::ServiceCheck.new(check_lambda, check_error_message) }
       let(:check_lambda) { lambda { |_container| true } }
       let(:check_error_message) { "" }
       let(:checks) { [check] }
-      subject { described_class.new(checks, timeout, 1).verify(service) }
 
       context 'all checks successful' do
         it 'runs without incident' do
@@ -78,8 +84,6 @@ describe KumoDockerCloud::ServiceChecker do
       let(:happy_check) { lambda { |container| expect(container).to eq(container); true } }
       let(:sad_check) { lambda { |container| expect(container).to eq(container); false } }
       let(:checks) {[happy_check]}
-
-      subject { described_class.new(checks, timeout, 1).verify(service) }
 
       context "all checks successful" do
         it "runs without incident" do
