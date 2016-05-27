@@ -28,7 +28,7 @@ module KumoDockerCloud
     private
 
     def default_check
-      @default_check ||= [lambda { |container| container.state == 'Running' }]
+      @default_check ||= ServiceCheck.new(lambda { |container| container.state == 'Running' }, "Service is not running")
     end
   end
 end

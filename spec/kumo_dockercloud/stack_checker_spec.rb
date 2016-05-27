@@ -5,8 +5,8 @@ describe KumoDockerCloud::StackChecker do
   let(:services) { [service]}
   let(:failed_services) { double(:service_api, name: 'redbubble', state: 'Stopped')}
   let(:service_checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil)}
-  let(:default_service_check) { [double(:default_check)] }
-  let(:specific_service_check) { { "redbubble" => [double(:specific_check)] } }
+  let(:default_service_check) { [instance_double(KumoDockerCloud::ServiceCheck)] }
+  let(:specific_service_check) { { "redbubble" => [instance_double(KumoDockerCloud::ServiceCheck)] } }
 
   subject { described_class.new.verify(stack) }
 
