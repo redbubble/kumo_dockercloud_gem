@@ -1,11 +1,17 @@
 require 'csv'
 
 module KumoDockerCloud
-  class Haproxy
-    def initialize(container_id, dc_user = ENV['DOCKERCLOUD_USER'], dc_key = ENV['DOCKERCLOUD_APIKEY'])
-      @container_id = container_id
-      @client = DockerCloud::Client.new(dc_user, dc_key)
+  class HaproxyService < Service
+    def initialize(stack_name)
+      super(stack_name, 'haproxy')
+
+      @client = docker_cloud_api.client
     end
+
+    def disable_service(service)
+    end
+
+    private
 
     def stats
       CSV.parse(HaproxyCommand.new(@container_id, @client).execute('show stat'), headers: true)

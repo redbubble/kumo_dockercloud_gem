@@ -67,75 +67,55 @@ describe KumoDockerCloud::Stack do
   end
 
   describe '#deploy_blue_green' do
-    let(:service_name) { 'test_service' }
-    let(:version) { '1' }
-    let(:checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil) }
-
-    let(:active_service) { instance_double(KumoDockerCloud::Service, :active_service, name: "service-a", stop: nil) }
-    let(:inactive_service) { instance_double(KumoDockerCloud::Service, :inactive_service, name: "service-b", deploy: nil) }
-    let(:service_link) { { name: switching_service_internal_link_name, to_service: linked_service_uri} }
-    let(:linked_service_uri) { "active_uri" }
-    let(:switching_service) { instance_double(KumoDockerCloud::Service, links: [service_link], set_link: nil) }
-    let(:switching_service_internal_link_name) { "app" }
-    let(:deploy_options) do
+    subject { stack.deploy_blue_green(options) }
+    let(:options) do
       {
-        service_names: [active_service.name, inactive_service.name],
+        service_names: ['service-a', 'service-b'],
         version: version,
-        checker: checker,
-        switching_service_name: "switcher"
+        checker: instance_double(KumoDockerCloud::ServiceChecker, :service_checker, verify: true)
       }
     end
-
-    subject { described_class.new(app_name, environment_name).deploy_blue_green(deploy_options) }
+    let(:version) { 1 }
+    let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, state: 'Running', deploy: nil) }
+    let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, state: 'Running', deploy: nil) }
+    let(:haproxy) { instance_double(KumoDockerCloud::HaproxyService, :haproxy_svc, disable_service: nil) }
 
     before do
-      allow(KumoDockerCloud::Service).to receive(:service_by_resource_uri).with(linked_service_uri).and_return(active_service)
-
-      allow(KumoDockerCloud::Service).to receive(:new)
-        .with(stack_name, active_service.name)
-        .and_return(active_service)
-
-      allow(KumoDockerCloud::Service).to receive(:new)
-        .with(stack_name, inactive_service.name)
-        .and_return(inactive_service)
-
-      allow(KumoDockerCloud::Service).to receive(:new)
-        .with(stack_name, deploy_options[:switching_service_name])
-        .and_return(switching_service)
+      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, 'service-a').and_return(service_a)
+      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, 'service-b').and_return(service_b)
+      allow(KumoDockerCloud::HaproxyService).to receive(:new).with(stack_name).and_return(haproxy)
     end
 
-    context 'when parameters are missing' do
-      it 'blows up when version is missing' do
-        deploy_options.delete(:version)
-        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Version cannot be nil")
-      end
-
-      it 'blows up when service_names are missing' do
-        deploy_options.delete(:service_names)
-        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Service names cannot be nil")
-      end
-
-      it 'blows up when switching_service_name is missing' do
-        deploy_options.delete(:switching_service_name)
-        expect{ subject }.to raise_error(KumoDockerCloud::Error, "Switching service name cannot be nil")
-      end
-    end
-
-    it 'deploys to the blue service only' do
-      expect(inactive_service).to receive(:deploy).with(version)
-      expect(checker).to receive(:verify).with(inactive_service)
-      expect(active_service).to_not receive(:deploy)
+    it 'deploys to each service when both are active' do
+      expect(haproxy).to receive(:disable_service).with(service_a)
+      expect(haproxy).to receive(:disable_service).with(service_b)
+      expect(service_a).to receive(:deploy).with(version)
+      expect(service_b).to receive(:deploy).with(version)
       subject
     end
 
-    it 'switches over to the blue service on a successful deployment' do
-      expect(switching_service).to receive(:set_link).with(inactive_service, switching_service_internal_link_name)
+    it 'deploys to the stopped service first when one is inactive' do
+      allow(service_b).to receive(:state).and_return('Stopped')
+
+      expect(haproxy).to receive(:disable_service).with(service_b).ordered
+      expect(service_b).to receive(:deploy).with(version).ordered
+      expect(haproxy).to receive(:disable_service).with(service_a).ordered
+      expect(service_a).to receive(:deploy).with(version).ordered
       subject
     end
 
-    it 'shuts down the previously green service' do
-      expect(active_service).to receive(:stop)
+    it 'runs the check on each service' do
+      checker = options[:checker]
+      expect(checker).to receive(:verify).with(service_a)
+      expect(checker).to receive(:verify).with(service_b)
       subject
+    end
+
+    it 'cancels deployment if the first deploy fails' do
+      checker = options[:checker]
+      allow(checker).to receive(:verify).with(service_a).and_raise(KumoDockerCloud::ServiceDeployError)
+      expect(service_b).to_not receive(:deploy)
+      expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError)
     end
   end
 
