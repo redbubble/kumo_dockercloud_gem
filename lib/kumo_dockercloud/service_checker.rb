@@ -34,8 +34,8 @@ module KumoDockerCloud
       checks.each do |check|
         service.containers.each do |container|
           unless check.call(container)
-            if check.respond_to?(:error_message) 
-              @error_messages << check.error_message
+            if check.respond_to?(:error_message)
+              @error_messages << ( check.error_message + " | Service Name: #{service.name}" )
             end
             return true
           end

@@ -22,7 +22,7 @@ describe KumoDockerCloud::ServiceChecker do
   describe '#verify' do
     let(:container) { double(:my_container) }
     let(:containers) { [container, container] }
-    let(:service) { instance_double(KumoDockerCloud::Service, containers: containers) }
+    let(:service) { instance_double(KumoDockerCloud::Service, containers: containers, name: 'service') }
     let(:timeout) { 0.5 }
     let(:quiet_time) { 0.1 }
 
@@ -49,8 +49,8 @@ describe KumoDockerCloud::ServiceChecker do
         let(:check_lambda) { lambda { |_container| false } }
         let(:check_error_message) { "Expected error message" }
 
-        it "raises an error" do
-          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout. Message: #{check_error_message}")
+        it "raises an error with service detail" do
+          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout. Message: #{check_error_message} | Service Name: #{service.name}")
         end
       end
 
@@ -63,19 +63,19 @@ describe KumoDockerCloud::ServiceChecker do
           subject
         end
       end
- 
-      context "multiple errors" do
+
+      context "one check failing and succeding and one check failing" do
         let(:mutating_state) { [] }
-        let(:failey_passey_lambda) { lambda { |_container| mutating_state << 1; mutating_state.size > 1 } }
-        let(:failey_passey_error_message) { "Your mutant became a zombie" }
-        let(:failey_passey_check) { KumoDockerCloud::ServiceCheck.new(failey_passey_lambda, failey_passey_error_message) }
+        let(:failed_and_passed_lambda) { lambda { |_container| mutating_state << 1; mutating_state.size > 1 } }
+        let(:failed_and_passed_error_message) { "Your mutant became a zombie" }
+        let(:failed_and_passed_check) { KumoDockerCloud::ServiceCheck.new(failed_and_passed_lambda, failed_and_passed_error_message) }
         let(:failing_lambda) { lambda { |_container| false } }
         let(:failing_error_message) { "You failed. Too bad." }
         let(:failing_check) { KumoDockerCloud::ServiceCheck.new(failing_lambda, failing_error_message) }
-        let(:checks) { [failey_passey_check, failing_check] }
+        let(:checks) { [failed_and_passed_check, failing_check] }
 
         it "runs without incident" do
-          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout. Message: #{failing_error_message}")
+          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout. Message: #{failing_error_message} | Service Name: #{service.name}")
         end
       end
     end
