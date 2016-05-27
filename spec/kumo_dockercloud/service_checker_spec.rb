@@ -50,7 +50,7 @@ describe KumoDockerCloud::ServiceChecker do
         let(:check_error_message) { "Expected error message" }
 
         it "raises an error with service detail" do
-          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout.\nMessage: #{check_error_message} | Service Name: #{service.name}\nMessage: #{check_error_message} | Service Name: #{service.name}")
+          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout.\nMessage: #{check_error_message} | Service Name: #{service.name}")
         end
       end
 
@@ -75,7 +75,7 @@ describe KumoDockerCloud::ServiceChecker do
         let(:checks) { [failed_and_passed_check, failing_check] }
 
         it "runs without incident" do
-          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout.\nMessage: #{failing_error_message} | Service Name: #{service.name}\nMessage: #{failing_error_message} | Service Name: #{service.name}")
+          expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError, "One or more checks failed to pass within the timeout.\nMessage: #{failing_error_message} | Service Name: #{service.name}")
         end
       end
 
