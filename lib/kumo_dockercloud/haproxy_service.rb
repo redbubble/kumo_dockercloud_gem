@@ -11,8 +11,6 @@ module KumoDockerCloud
     def disable_service(service)
     end
 
-    private
-
     def stats
       CSV.parse(HaproxyCommand.new(@container_id, @client).execute('show stat'), headers: true)
     end

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe KumoDockerCloud::Haproxy do
-  subject { KumoDockerCloud::Haproxy.new('container_id', 'dc_user', 'dc_key') }
+describe KumoDockerCloud::HaproxyService do
+  subject { KumoDockerCloud::HaproxyService.new('service_name') }
 
   let(:haproxy_command) { instance_double(KumoDockerCloud::HaproxyCommand, :haproxy_command )}
   let(:csv_output) { 'a,b\n1,2' }

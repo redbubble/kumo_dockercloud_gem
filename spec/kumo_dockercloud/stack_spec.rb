@@ -67,14 +67,9 @@ describe KumoDockerCloud::Stack do
   end
 
   describe '#deploy_blue_green' do
-    subject { stack.deploy_blue_green(options) }
-    let(:options) do
-      {
-        service_names: ['service-a', 'service-b'],
-        version: version,
-        checker: instance_double(KumoDockerCloud::ServiceChecker, :service_checker, verify: true)
-      }
-    end
+    subject { stack.deploy_blue_green(service_names, version, checker) }
+    let(:checker) { instance_double(KumoDockerCloud::ServiceChecker, :service_checker, verify: true) }
+    let(:service_names) { ['service-a', 'service-b'] }
     let(:version) { 1 }
     let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, state: 'Running', deploy: nil) }
     let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, state: 'Running', deploy: nil) }
@@ -105,14 +100,12 @@ describe KumoDockerCloud::Stack do
     end
 
     it 'runs the check on each service' do
-      checker = options[:checker]
       expect(checker).to receive(:verify).with(service_a)
       expect(checker).to receive(:verify).with(service_b)
       subject
     end
 
     it 'cancels deployment if the first deploy fails' do
-      checker = options[:checker]
       allow(checker).to receive(:verify).with(service_a).and_raise(KumoDockerCloud::ServiceDeployError)
       expect(service_b).to_not receive(:deploy)
       expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError)

@@ -20,11 +20,8 @@ module KumoDockerCloud
       checker.verify(service)
     end
 
-    def deploy_blue_green(options)
-      service_names = options[:service_names]
-      version = options[:version]
+    def deploy_blue_green(service_names, version, checker = ServiceChecker.new)
       haproxy_service = HaproxyService.new(@stack_name)
-      checker = options[:checker]
 
       services = service_names.map { |name| Service.new(stack_name, name) }
       ordered_deployment(services).each do |service|
