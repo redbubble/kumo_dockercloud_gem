@@ -21,7 +21,7 @@ module KumoDockerCloud
       end
     rescue Timeout::Error
       if @error_messages.length > 0
-        raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout. Message: #{@error_messages.first}")
+        raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout.#{@error_messages.join}")
       else
         raise KumoDockerCloud::ServiceDeployError.new("One or more checks failed to pass within the timeout. I'd show you what went wrong but the checks were lambdas so I can't. Maybe you should update your usage to the new ServiceCheck object instead of lambdas?")
       end
@@ -30,18 +30,19 @@ module KumoDockerCloud
     private
 
     def any_check_failing?(service)
+      failed = false
       @error_messages = []
       checks.each do |check|
         service.containers.each do |container|
           unless check.call(container)
             if check.respond_to?(:error_message)
-              @error_messages << ( check.error_message + " | Service Name: #{service.name}" )
+              @error_messages << ( "\nMessage: #{check.error_message} | Service Name: #{service.name}" )
             end
-            return true
+            failed = true
           end
         end
       end
-      false
+      failed
     end
   end
 end
