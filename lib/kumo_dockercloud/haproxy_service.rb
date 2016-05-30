@@ -12,7 +12,9 @@ module KumoDockerCloud
 
       raise KumoDockerCloud::Error.new('Could not get instances of the haproxy container for this environment') if haproxy_containers.empty?
 
-      haproxy_containers.each { |haproxy_container| haproxy_container.disable_server(service_to_disable) }
+      haproxy_threads = haproxy_containers.map { |haproxy_container| Thread.new { haproxy_container.disable_server(service_to_disable) } }
+      haproxy_threads.each(&:join)
+
     end
   end
 end
