@@ -11,7 +11,7 @@ module KumoDockerCloud
     end
 
     def on_message
-      Proc.new { |event| puts event.data ; @data << JSON.parse(event.data)['output'] }
+      Proc.new { |event| @data << JSON.parse(event.data)['output'] }
     end
 
     def on_error
