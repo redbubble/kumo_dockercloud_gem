@@ -1,8 +1,8 @@
 module KumoDockerCloud
   class StackChecker
-    def initialize(specific_checks = {}, common_check = nil, timeout = 300)
+    def initialize(specific_checks = {}, default_check = nil, timeout = 300)
       @checks = specific_checks
-      @default_check = common_check
+      @default_check = default_check
       @timeout = timeout
     end
 
