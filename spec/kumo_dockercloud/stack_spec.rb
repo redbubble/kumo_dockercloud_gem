@@ -116,8 +116,10 @@ describe KumoDockerCloud::Stack do
       expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError)
     end
 
-    it 'attempts to place a service into maintainance mode if deployment fails' do
-
+    it 'attempts to place a service into maintainance mode if deployment fails because HAProxy will take it out of maintainance mode on deploy' do
+      expect(haproxy).to receive(:disable_service).with(service_a).twice
+      allow(checker).to receive(:verify).with(service_a).and_raise(KumoDockerCloud::ServiceDeployError)
+      expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError)
     end
   end
 
