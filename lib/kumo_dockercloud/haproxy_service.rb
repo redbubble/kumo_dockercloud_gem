@@ -1,5 +1,3 @@
-require 'csv'
-
 module KumoDockerCloud
   class HaproxyService < Service
     def initialize(stack_name)

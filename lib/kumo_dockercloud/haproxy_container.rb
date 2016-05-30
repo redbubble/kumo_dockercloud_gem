@@ -1,3 +1,5 @@
+require 'csv'
+
 module KumoDockerCloud
   class HaproxyContainer
     def initialize(container_id, client)
