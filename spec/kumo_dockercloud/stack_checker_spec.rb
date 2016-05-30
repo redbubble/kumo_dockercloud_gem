@@ -5,7 +5,7 @@ describe KumoDockerCloud::StackChecker do
   let(:services) { [service]}
   let(:failed_services) { double(:service_api, name: 'redbubble', state: 'Stopped')}
   let(:service_checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil)}
-  let(:default_service_check) { [instance_double(KumoDockerCloud::ServiceCheck)] }
+  let(:default_service_check) { instance_double(KumoDockerCloud::ServiceCheck) }
   let(:specific_service_check) { { "redbubble" => [instance_double(KumoDockerCloud::ServiceCheck)] } }
 
   subject { described_class.new.verify(stack) }
@@ -33,13 +33,13 @@ describe KumoDockerCloud::StackChecker do
 
     context 'single service' do
       context 'without passing services checks' do
-        before { allow_any_instance_of(KumoDockerCloud::StackChecker).to receive(:default_check).and_return(default_service_check) }
+        before { allow(KumoDockerCloud::ServiceCheck).to receive(:new).and_return(default_service_check) }
         it 'returns true when verify successful' do
           expect(subject).to be true
         end
 
         it 'uses default check' do
-          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with(default_service_check, 300)
+          expect(KumoDockerCloud::ServiceChecker).to receive(:new).with([default_service_check], 300)
           subject
         end
 
