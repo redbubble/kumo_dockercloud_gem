@@ -32,8 +32,8 @@ EOF
   end
 
   describe '#disable_server' do
-    let(:server_name) { 'redbubble_a' }
-    let(:non_existant_server_name) { 'redbubble_c' }
+    let(:server_name) { 'redbubble-a' }
+    let(:non_existant_server_name) { 'redbubble-c' }
     let(:haproxy_server_name) { 'REDBUBBLE_A_1' }
 
     it 'runs disable server using HAProxy\'s name' do
@@ -52,7 +52,7 @@ EOF
   end
 
   describe '#enable_server' do
-    let(:server_name) { 'blue_server' }
+    let(:server_name) { 'blue-server' }
 
     it 'runs enable server' do
       expect(haproxy_command).to receive(:execute).with("enable server #{server_name}")

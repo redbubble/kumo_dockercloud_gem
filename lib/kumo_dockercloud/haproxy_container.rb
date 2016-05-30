@@ -29,7 +29,7 @@ module KumoDockerCloud
     private
 
     def prefix_match?(stat_record, server_name)
-      stat_record["svname"].downcase.start_with? server_name.downcase
+      stat_record["svname"].downcase.start_with? server_name.downcase.gsub('-', '_')
     end
 
     def get_server_names(stats_object)
