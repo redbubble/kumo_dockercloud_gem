@@ -71,8 +71,8 @@ describe KumoDockerCloud::Stack do
     let(:checker) { instance_double(KumoDockerCloud::ServiceChecker, :service_checker, verify: true) }
     let(:service_names) { ['service-a', 'service-b'] }
     let(:version) { 1 }
-    let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, state: 'Running', deploy: nil) }
-    let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, state: 'Running', deploy: nil) }
+    let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, state: 'Running', deploy: nil, name: 'service_a') }
+    let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, state: 'Running', deploy: nil, name: 'service_b') }
     let(:haproxy) { instance_double(KumoDockerCloud::HaproxyService, :haproxy_svc, disable_service: nil) }
 
     before do
@@ -109,6 +109,15 @@ describe KumoDockerCloud::Stack do
       allow(checker).to receive(:verify).with(service_a).and_raise(KumoDockerCloud::ServiceDeployError)
       expect(service_b).to_not receive(:deploy)
       expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError)
+    end
+
+    it 'raises an error if any attempt to place a service into maintainance mode fails' do
+      expect(haproxy).to receive(:disable_service).with(service_a).and_raise(KumoDockerCloud::HAProxyStateError, 'Something broke!')
+      expect { subject }.to raise_error(KumoDockerCloud::ServiceDeployError)
+    end
+
+    it 'attempts to place a service into maintainance mode if deployment fails' do
+
     end
   end
 

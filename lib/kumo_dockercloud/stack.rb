@@ -25,9 +25,13 @@ module KumoDockerCloud
 
       services = service_names.map { |name| Service.new(stack_name, name) }
       ordered_deployment(services).each do |service|
-        haproxy_service.disable_service(service)
-        service.deploy(version)
-        checker.verify(service)
+        begin
+          haproxy_service.disable_service(service)
+          service.deploy(version)
+          checker.verify(service)
+        rescue HAProxyStateError
+          raise ServiceDeployError.new("Unable to place service #{service.name} into maintainance mode on HAProxy")
+        end
       end
     end
 
