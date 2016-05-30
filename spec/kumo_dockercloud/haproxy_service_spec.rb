@@ -30,5 +30,5 @@ describe KumoDockerCloud::HaproxyService do
       allow(docker_cloud_service).to receive(:containers).and_return([])
       expect { subject }.to raise_error(KumoDockerCloud::HAProxyStateError, 'Could not get instances of the haproxy container for this environment')
     end
-   end
+  end
 end
