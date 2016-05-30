@@ -25,5 +25,10 @@ describe KumoDockerCloud::HaproxyService do
       expect(haproxy_container).to receive(:disable_server).with(service_name)
       subject
     end
+
+    it 'blows up when there are no instances of haproxy' do
+      allow(docker_cloud_service).to receive(:containers).and_return([])
+      expect { subject }.to raise_error(KumoDockerCloud::Error, 'Could not get instances of the haproxy container for this environment')
+    end
    end
 end
