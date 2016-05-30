@@ -9,7 +9,9 @@ module KumoDockerCloud
     end
 
     def disable_service(service)
+      service_to_disable = service.name
+      haproxy_containers = containers.map { |container| HaproxyContainer.new(container.uuid, @client) }
+      haproxy_containers.each { |haproxy_container| haproxy_container.disable_server(service_to_disable) }
     end
-
   end
 end
