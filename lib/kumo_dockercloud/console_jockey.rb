@@ -19,6 +19,12 @@ module KumoDockerCloud
       $stdout.flush
     end
 
+    def self.write_char(char)
+      print char
+
+      $stdout.flush
+    end
+
     def self.get_confirmation(timeout=30)
       begin
         status = Timeout::timeout(timeout) {
