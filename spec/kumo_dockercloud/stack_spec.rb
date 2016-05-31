@@ -73,7 +73,7 @@ describe KumoDockerCloud::Stack do
     let(:version) { 1 }
     let(:service_a) { instance_double(KumoDockerCloud::Service, :service_a, state: 'Running', deploy: nil, name: 'service_a') }
     let(:service_b) { instance_double(KumoDockerCloud::Service, :service_b, state: 'Running', deploy: nil, name: 'service_b') }
-    let(:haproxy) { instance_double(KumoDockerCloud::HaproxyService, :haproxy_svc, disable_service: nil) }
+    let(:haproxy) { instance_double(KumoDockerCloud::HaproxyService, :haproxy_svc, disable_service: nil, enable_service: nil) }
 
     before do
       allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, 'service-a').and_return(service_a)
@@ -102,6 +102,12 @@ describe KumoDockerCloud::Stack do
     it 'runs the check on each service' do
       expect(checker).to receive(:verify).with(service_a)
       expect(checker).to receive(:verify).with(service_b)
+      subject
+    end
+
+    it 're-enables each service in haproxy' do
+      expect(haproxy).to receive(:enable_service).with(service_a)
+      expect(haproxy).to receive(:enable_service).with(service_b)
       subject
     end
 

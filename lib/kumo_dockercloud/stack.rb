@@ -29,6 +29,7 @@ module KumoDockerCloud
           haproxy_service.disable_service(service) unless service.state == "Stopped"
           service.deploy(version)
           checker.verify(service)
+          haproxy_service.enable_service(service)
         rescue HAProxyStateError => e
           raise ServiceDeployError.new("Unable to place service #{service.name} into maintainance mode on HAProxy with message: #{e.message}")
         rescue ServiceDeployError => e
