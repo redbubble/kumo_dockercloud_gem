@@ -92,7 +92,7 @@ describe KumoDockerCloud::Stack do
     it 'deploys to the stopped service first when one is inactive' do
       allow(service_b).to receive(:state).and_return('Stopped')
 
-      expect(haproxy).to receive(:disable_service).with(service_b).ordered
+      expect(haproxy).to_not receive(:disable_service).with(service_b)
       expect(service_b).to receive(:deploy).with(version).ordered
       expect(haproxy).to receive(:disable_service).with(service_a).ordered
       expect(service_a).to receive(:deploy).with(version).ordered

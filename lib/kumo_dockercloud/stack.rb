@@ -26,7 +26,7 @@ module KumoDockerCloud
       services = service_names.map { |name| Service.new(stack_name, name) }
       ordered_deployment(services).each do |service|
         begin
-          haproxy_service.disable_service(service)
+          haproxy_service.disable_service(service) unless service.state == "Stopped"
           service.deploy(version)
           checker.verify(service)
         rescue HAProxyStateError => e
