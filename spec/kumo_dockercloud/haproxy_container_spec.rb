@@ -8,11 +8,14 @@ describe KumoDockerCloud::HaproxyContainer do
   let(:csv_output) do <<EOF
 # pxname,svname
 default_frontend,FRONTEND
-default_service,REDBUBBLE_A_1
-default_service,REDBUBBLE_B
+default_service,BLUE_SERVICE_1
+default_service,GREEN_SERVICE
 default_service,BACKEND
 EOF
   end
+  let(:haproxy_server_name) { 'default_service/BLUE_SERVICE_1' }
+  let(:server_name) { 'blue-service' }
+  let(:non_existant_server_name) { 'derpy-service' }
 
   before do
     allow(KumoDockerCloud::HaproxyCommand).to receive(:new).and_return(haproxy_command)
@@ -32,12 +35,7 @@ EOF
   end
 
   describe '#disable_server' do
-    let(:server_name) { 'redbubble-a' }
-    let(:non_existant_server_name) { 'redbubble-c' }
-    let(:haproxy_server_name) { 'REDBUBBLE_A_1' }
-
-    it 'runs disable server using HAProxy\'s name' do
-
+    it "runs disable server using HAProxy's name" do
       expect(haproxy_command).to receive(:execute).with("disable server #{haproxy_server_name}")
       subject.disable_server(server_name)
     end
@@ -45,18 +43,23 @@ EOF
     it 'raises an error if it is unable to map a server name to a haproxy name' do
       expect { subject.disable_server(non_existant_server_name) }.to raise_error(
         KumoDockerCloud::HAProxyStateError,
-        "Unable to map #{non_existant_server_name} to a HAProxy backend, I saw REDBUBBLE_A_1, REDBUBBLE_B, BACKEND"
+        "Unable to map #{non_existant_server_name} to a HAProxy backend, I saw BLUE_SERVICE_1, GREEN_SERVICE, BACKEND"
       )
     end
 
   end
 
   describe '#enable_server' do
-    let(:server_name) { 'blue-server' }
-
-    it 'runs enable server' do
-      expect(haproxy_command).to receive(:execute).with("enable server #{server_name}")
+    it "runs enable server using HAProxy's name" do
+      expect(haproxy_command).to receive(:execute).with("enable server #{haproxy_server_name}")
       subject.enable_server(server_name)
+    end
+
+    it 'raises an error if it is unable to map a server name to a haproxy name' do
+      expect { subject.disable_server(non_existant_server_name) }.to raise_error(
+        KumoDockerCloud::HAProxyStateError,
+        "Unable to map #{non_existant_server_name} to a HAProxy backend, I saw BLUE_SERVICE_1, GREEN_SERVICE, BACKEND"
+      )
     end
   end
 end
