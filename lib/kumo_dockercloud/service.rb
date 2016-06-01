@@ -30,6 +30,10 @@ module KumoDockerCloud
       get_service.linked_to_service
     end
 
+    def state
+      get_service.state
+    end
+
     def set_link(service_to_link, link_internal_name)
       linked_service = {
         to_service: service_to_link.resource_uri,
@@ -50,6 +54,10 @@ module KumoDockerCloud
 
     def containers
       get_service.containers
+    end
+
+    def uuid
+      get_service.uuid
     end
 
     private
@@ -73,10 +81,6 @@ module KumoDockerCloud
 
     def get_service
       docker_cloud_api.service_by_stack_and_service_name(stack_name, name)
-    end
-
-    def uuid
-      get_service.uuid
     end
 
     def image_name

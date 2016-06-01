@@ -5,6 +5,7 @@ module KumoDockerCloud
   class DockerCloudApi
     extend Forwardable
     def_delegators :@client, :services, :stacks
+    attr_reader :client
 
     def initialize(options = {})
       options[:username] ||= ENV['DOCKERCLOUD_USER']
