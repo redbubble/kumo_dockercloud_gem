@@ -7,10 +7,6 @@ module KumoDockerCloud
       @client = client
     end
 
-    def stats
-      CSV.parse(HaproxyCommand.new(@container_id, @client).execute('show stat'), headers: true)
-    end
-
     def disable_server(server_name)
       haproxy_server_name = haproxy_server_name(server_name)
 
@@ -23,6 +19,18 @@ module KumoDockerCloud
     end
 
     private
+
+    def stats
+      haproxy_command = HaproxyCommand.new(@container_id, @client)
+      command_output = ''
+      retry_counter = 0
+      while command_output.empty? && retry_counter < 3
+        command_output = haproxy_command.execute('show stat')
+        retry_counter += 1
+      end
+      raise HAProxyStateError.new("Could not get stats from HAProxy backend") if command_output.empty?
+      CSV.parse(command_output, headers: true)
+    end
 
     def haproxy_server_name(server_name)
       current_stats = stats
