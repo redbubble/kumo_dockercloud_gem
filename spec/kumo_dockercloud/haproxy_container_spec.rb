@@ -39,7 +39,7 @@ EOF
       expect(haproxy_command).to receive(:execute).with('show stat').exactly(3).times.and_return('')
       expect { subject.disable_server(server_name) }.to raise_error(
         KumoDockerCloud::HAProxyStateError,
-        "Could not get stats from HAProxy backend"
+        "Could not get stats from HAProxy backend from container id: container-id"
       )
     end
 
@@ -69,7 +69,7 @@ EOF
       expect(haproxy_command).to receive(:execute).with('show stat').exactly(3).times.and_return('')
       expect { subject.enable_server(server_name) }.to raise_error(
         KumoDockerCloud::HAProxyStateError,
-        "Could not get stats from HAProxy backend"
+        "Could not get stats from HAProxy backend from container id: container-id"
       )
     end
 

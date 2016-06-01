@@ -27,7 +27,7 @@ module KumoDockerCloud
         command_output = haproxy_command.execute('show stat')
         retry_counter += 1
       end
-      raise HAProxyStateError.new("Could not get stats from HAProxy backend") if command_output.empty?
+      raise HAProxyStateError.new("Could not get stats from HAProxy backend from container id: #{@container_id}") if command_output.empty?
       CSV.parse(command_output, headers: true)
     end
 
