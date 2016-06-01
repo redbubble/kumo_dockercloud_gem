@@ -9,13 +9,12 @@ module KumoDockerCloud
 
     def disable_server(server_name)
       haproxy_server_name = haproxy_server_name(server_name)
-
-      HaproxyCommand.new(@container_id, @client).execute("disable server default_service/#{haproxy_server_name}")
+      HaproxyCommand.new(@container_id, @client).execute("disable server #{haproxy_server_name}")
     end
 
     def enable_server(server_name)
       haproxy_server_name = haproxy_server_name(server_name)
-      HaproxyCommand.new(@container_id, @client).execute("enable server default_service/#{haproxy_server_name}")
+      HaproxyCommand.new(@container_id, @client).execute("enable server #{haproxy_server_name}")
     end
 
     private
@@ -38,7 +37,7 @@ module KumoDockerCloud
 
       raise HAProxyStateError.new("Unable to map #{server_name} to a HAProxy backend, I saw #{ get_server_names(current_stats) }") unless haproxy_server_record
 
-      haproxy_server_record['svname']
+      "#{haproxy_server_record['# pxname']}/#{haproxy_server_record['svname']}"
     end
 
     def prefix_match?(stat_record, server_name)
