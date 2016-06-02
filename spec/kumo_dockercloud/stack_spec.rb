@@ -79,6 +79,7 @@ describe KumoDockerCloud::Stack do
       allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, 'service-a').and_return(service_a)
       allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, 'service-b').and_return(service_b)
       allow(KumoDockerCloud::HaproxyService).to receive(:new).with(stack_name).and_return(haproxy)
+      allow(KumoDockerCloud::ConsoleJockey).to receive(:write_line)
     end
 
     it 'deploys to each service when both are active' do
