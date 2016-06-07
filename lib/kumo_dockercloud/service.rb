@@ -1,12 +1,11 @@
-require 'timeout'
-
 module KumoDockerCloud
   class Service
     attr_reader :name
 
-    def initialize(stack_name, service_name)
+    def initialize(stack_name, service_name, docker_cloud_api = DockerCloudApi.new)
       @stack_name = stack_name
       @name = service_name
+      @docker_cloud_api = docker_cloud_api
     end
 
     def self.service_by_resource_uri(resource_uri)
@@ -76,7 +75,7 @@ module KumoDockerCloud
     end
 
     def docker_cloud_api
-      @docker_cloud_api ||= KumoDockerCloud::DockerCloudApi.new
+      @docker_cloud_api
     end
 
     def get_service

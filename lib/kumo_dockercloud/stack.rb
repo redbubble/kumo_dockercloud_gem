@@ -4,8 +4,7 @@ module KumoDockerCloud
   class Stack
     attr_reader :stack_name, :app_name, :options
 
-    #TODO delete options
-    def initialize(app_name, env_name, options = { contactable: true })
+    def initialize(app_name, env_name, options = {})
       @app_name = app_name
       @stack_name = "#{app_name}-#{env_name}"
       @options = options
@@ -15,15 +14,15 @@ module KumoDockerCloud
       validate_params(service_name, 'Service name')
       validate_params(version, 'Version')
 
-      service = Service.new(stack_name, service_name)
+      service = Service.new(stack_name, service_name, docker_cloud_api)
       service.deploy(version)
       checker.verify(service)
     end
 
     def deploy_blue_green(service_names, version, checker = ServiceChecker.new)
-      haproxy_service = HaproxyService.new(@stack_name)
+      haproxy_service = HaproxyService.new(@stack_name, docker_cloud_api)
 
-      services = service_names.map { |name| Service.new(stack_name, name) }
+      services = service_names.map { |name| Service.new(stack_name, name, docker_cloud_api) }
       ordered_deployment(services).each do |service|
         begin
           ConsoleJockey.write_line("Attempting to put #{service.name} into maintenance mode in HAProxy")
@@ -59,8 +58,17 @@ module KumoDockerCloud
       raise KumoDockerCloud::Error.new("#{param_name} cannot be empty") if param_value.empty?
     end
 
+    def kms
+      @kms ||= KumoKi::KMS.new
+    end
+
     def docker_cloud_api
-      @docker_cloud_api ||= DockerCloudApi.new
+      dockercloud_api_options = {}
+      if @options[:encrypted_dockercloud_user] && @options[:encrypted_dockercloud_apikey]
+        dockercloud_api_options.merge! KumoDockerCloud::CredentialsDecrypter.new.decrypt(@options)
+      end
+
+      @docker_cloud_api ||= DockerCloudApi.new(dockercloud_api_options)
     end
   end
 end

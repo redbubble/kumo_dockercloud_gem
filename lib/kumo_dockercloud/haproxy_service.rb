@@ -1,7 +1,7 @@
 module KumoDockerCloud
   class HaproxyService < Service
-    def initialize(stack_name)
-      super(stack_name, 'haproxy')
+    def initialize(stack_name, docker_cloud_api = DockerCloudApi.new)
+      super(stack_name, 'haproxy', docker_cloud_api)
 
       @client = docker_cloud_api.client
     end
