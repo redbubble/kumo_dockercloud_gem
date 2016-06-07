@@ -9,13 +9,37 @@ describe KumoDockerCloud::Stack do
     let(:version) { '1' }
     let(:checker) { instance_double(KumoDockerCloud::ServiceChecker, verify: nil) }
     let(:service) { instance_double(KumoDockerCloud::Service) }
+    let(:dockercloud_api) { instance_double(KumoDockerCloud::DockerCloudApi) }
 
     before do
-      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name).and_return(service)
+      allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return(dockercloud_api)
+      allow(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name, dockercloud_api).and_return(service)
       allow(service).to receive(:deploy).with(version)
     end
 
     subject { stack.deploy(service_name, version) }
+
+    context 'with encrypted credentials' do
+      let(:encrypted_creds) { { encrypted_dockercloud_user: "[ENC,#{encrypted_user}", encrypted_dockercloud_apikey: "[ENC,#{encrypted_apikey}" } }
+      let(:stack_with_encrypted_creds) { described_class.new(app_name, environment_name, encrypted_creds) }
+      let(:kms) { instance_double(KumoKi::KMS) }
+      let(:encrypted_user) { 'encrypted_user' }
+      let(:encrypted_apikey) { 'encrypted_apikey' }
+      let(:plaintext_user) { 'plaintext_user' }
+      let(:plaintext_apikey) { 'plaintext_apikey' }
+
+      subject { stack_with_encrypted_creds.deploy(service_name, version) }
+
+      it 'decrypts the credentials and uses them to authenticate with docker cloud' do
+        allow(KumoKi::KMS).to receive(:new).and_return(kms)
+        allow(kms).to receive(:decrypt).with(encrypted_user).and_return(plaintext_user)
+        allow(kms).to receive(:decrypt).with(encrypted_apikey).and_return(plaintext_apikey)
+        allow(KumoDockerCloud::DockerCloudApi).to receive(:new).with(username: plaintext_user, api_key: plaintext_apikey).and_return(dockercloud_api)
+        expect(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name, dockercloud_api).and_return(service)
+
+        subject
+      end
+    end
 
     it 'deploys the version of my service' do
       expect(service).to receive(:deploy).with(version)
