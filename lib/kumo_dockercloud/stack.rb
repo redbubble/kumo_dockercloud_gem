@@ -65,10 +65,7 @@ module KumoDockerCloud
     def docker_cloud_api
       dockercloud_api_options = {}
       if @options[:encrypted_dockercloud_user] && @options[:encrypted_dockercloud_apikey]
-        dockercloud_api_options.merge!({
-          username: kms.decrypt(options[:encrypted_dockercloud_user][5..-1]),
-          api_key: kms.decrypt(options[:encrypted_dockercloud_apikey][5..-1])
-        })
+        dockercloud_api_options.merge! KumoDockerCloud::CredentialsDecrypter.new.decrypt(@options)
       end
 
       @docker_cloud_api ||= DockerCloudApi.new(dockercloud_api_options)

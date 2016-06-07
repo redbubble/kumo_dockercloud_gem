@@ -22,7 +22,7 @@ describe KumoDockerCloud::Stack do
     context 'with encrypted credentials' do
       let(:encrypted_creds) { { encrypted_dockercloud_user: "[ENC,#{encrypted_user}", encrypted_dockercloud_apikey: "[ENC,#{encrypted_apikey}" } }
       let(:stack_with_encrypted_creds) { described_class.new(app_name, environment_name, encrypted_creds) }
-      let(:kms) { instance_double(KumoKi::KMS) }
+      let(:credentials_decrypter) { instance_double(KumoDockerCloud::CredentialsDecrypter) }
       let(:encrypted_user) { 'encrypted_user' }
       let(:encrypted_apikey) { 'encrypted_apikey' }
       let(:plaintext_user) { 'plaintext_user' }
@@ -31,10 +31,10 @@ describe KumoDockerCloud::Stack do
       subject { stack_with_encrypted_creds.deploy(service_name, version) }
 
       it 'decrypts the credentials and uses them to authenticate with docker cloud' do
-        allow(KumoKi::KMS).to receive(:new).and_return(kms)
-        allow(kms).to receive(:decrypt).with(encrypted_user).and_return(plaintext_user)
-        allow(kms).to receive(:decrypt).with(encrypted_apikey).and_return(plaintext_apikey)
-        allow(KumoDockerCloud::DockerCloudApi).to receive(:new).with(username: plaintext_user, api_key: plaintext_apikey).and_return(dockercloud_api)
+        decrypted_creds = { username: plaintext_user, api_key: plaintext_apikey }
+        allow(KumoDockerCloud::CredentialsDecrypter).to receive(:new).and_return(credentials_decrypter)
+        allow(credentials_decrypter).to receive(:decrypt).with(encrypted_creds).and_return(decrypted_creds)
+        allow(KumoDockerCloud::DockerCloudApi).to receive(:new).with(decrypted_creds).and_return(dockercloud_api)
         expect(KumoDockerCloud::Service).to receive(:new).with(stack_name, service_name, dockercloud_api).and_return(service)
 
         subject
