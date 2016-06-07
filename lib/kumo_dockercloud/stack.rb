@@ -20,9 +20,9 @@ module KumoDockerCloud
     end
 
     def deploy_blue_green(service_names, version, checker = ServiceChecker.new)
-      haproxy_service = HaproxyService.new(@stack_name)
+      haproxy_service = HaproxyService.new(@stack_name, docker_cloud_api)
 
-      services = service_names.map { |name| Service.new(stack_name, name) }
+      services = service_names.map { |name| Service.new(stack_name, name, docker_cloud_api) }
       ordered_deployment(services).each do |service|
         begin
           ConsoleJockey.write_line("Attempting to put #{service.name} into maintenance mode in HAProxy")
