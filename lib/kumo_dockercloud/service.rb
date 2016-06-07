@@ -1,5 +1,3 @@
-require 'timeout'
-
 module KumoDockerCloud
   class Service
     attr_reader :name
