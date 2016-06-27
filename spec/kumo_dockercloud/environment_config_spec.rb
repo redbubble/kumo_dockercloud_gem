@@ -23,6 +23,14 @@ describe KumoDockerCloud::EnvironmentConfig do
     end
   end
 
+  describe '#config' do
+    subject { instance.config }
+
+    it "has the correct data" do
+      expect(subject['foo']).to eq 'bar'
+    end
+  end
+
   describe '#plain_text_secrets' do
     subject { instance.plain_text_secrets }
 
