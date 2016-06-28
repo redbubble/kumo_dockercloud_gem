@@ -64,6 +64,14 @@ module KumoDockerCloud
       end
     end
 
+    def config
+      return @config if @config
+
+      file = File.read(config_file_path)
+      erb_result = ERB.new(file).result(get_binding)
+      @config = YAML.load(erb_result)
+    end
+
     def plain_text_secrets
       @plain_text_secrets ||= Hash[
         encrypted_secrets.map do |name, cipher_text|
@@ -109,11 +117,20 @@ module KumoDockerCloud
       @kms ||= KumoKi::KMS.new
     end
 
+    def config_file_path
+      path = File.join(config_path, "#{env_name}.yml")
+      path = File.join(config_path, "development.yml") unless File.exist?(path)
+      path
+    end
+
     def encrypted_secrets_path
-      config_path      = File.expand_path(File.join(@config_path), __FILE__)
       secrets_filepath = File.join(config_path, "#{env_name}_secrets.yml")
       secrets_filepath = File.join(config_path, 'development_secrets.yml') unless File.exist?(secrets_filepath)
       secrets_filepath
+    end
+
+    def config_path
+      File.expand_path(File.join(@config_path), __FILE__)
     end
 
     def encrypted_secrets_filename
