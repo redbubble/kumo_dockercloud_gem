@@ -24,7 +24,7 @@ module KumoDockerCloud
     def self.escape_characters_that_need_special_handling(env_hash)
       env_hash.keys.reduce do |acc, key|
         if env_hash[key].is_a? String
-          acc[key] = (env_hash[key].is_a? String) ? env_hash[key].gsub(/[$]{1}/, "$$")
+          acc[key] = env_hash[key].gsub(/[$]{1}/, "$$")
         elsif env_hash[key].is_a? Numeric
           acc[key] = env_hash[key]
         else
