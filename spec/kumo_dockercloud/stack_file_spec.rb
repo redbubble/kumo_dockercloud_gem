@@ -77,6 +77,7 @@ describe KumoDockerCloud::StackFile do
         end
       end
 
+
       context 'and environment variables that are numeric' do
         let(:stack_template) do
           <<-eos
@@ -98,6 +99,7 @@ describe KumoDockerCloud::StackFile do
             }
           })
         end
+      end
     end
 
     context 'without any existing environment' do
