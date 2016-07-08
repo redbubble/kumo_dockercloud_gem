@@ -22,7 +22,7 @@ module KumoDockerCloud
     end
 
     def self.escape_characters_that_need_special_handling(env_hash)
-      env_hash.keys.reduce({}) { |acc, key| acc[key] = env_hash[key].gsub(/[$]{1}/, "$$"); acc }
+      env_hash.keys.reduce({}) { |acc, key| acc[key] = (env_hash[key].is_a? String) ? env_hash[key].gsub(/[$]{1}/, "$$") : env_hash[key]; acc }
     end
 
     private_class_method :make_all_root_level_keys_strings

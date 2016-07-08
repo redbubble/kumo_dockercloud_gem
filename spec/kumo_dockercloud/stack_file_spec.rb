@@ -76,6 +76,30 @@ describe KumoDockerCloud::StackFile do
           })
         end
       end
+
+
+      context 'and environment variables that are numeric' do
+        let(:stack_template) do
+          <<-eos
+            application-stack-name:
+              image: a-thing
+              environment:
+                TEST: 555
+          eos
+        end
+
+        # to work around https://github.com/docker/dockercloud-cli/issues/17
+        it 'passes those values through' do
+
+          expect(subject).to eq(app_name => {
+            'image' => 'a-thing',
+            'environment' => {
+              'TEST' => 555,
+              'KEY' => 'VALUE'
+            }
+          })
+        end
+      end
     end
 
     context 'without any existing environment' do
