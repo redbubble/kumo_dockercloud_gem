@@ -100,6 +100,21 @@ describe KumoDockerCloud::StackFile do
           })
         end
       end
+
+      context 'and environment variables that are neither numeric nor string' do
+        let(:stack_template) do
+          <<-eos
+            application-stack-name:
+              image: a-thing
+              environment:
+                TEST: yes
+          eos
+        end
+
+        it 'raises an error' do
+          expect(subject).to raise_error(KumoDockerCloud::StackFileError)
+        end
+      end
     end
 
     context 'without any existing environment' do

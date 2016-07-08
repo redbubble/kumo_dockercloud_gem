@@ -6,4 +6,5 @@ module KumoDockerCloud
   class EnvironmentApplyError < RuntimeError; end
   class StackCheckError < RuntimeError; end
   class InvalidStackError < RuntimeError; end
+  class StackFileError < RuntimeError; end
 end

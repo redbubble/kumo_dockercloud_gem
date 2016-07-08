@@ -22,7 +22,16 @@ module KumoDockerCloud
     end
 
     def self.escape_characters_that_need_special_handling(env_hash)
-      env_hash.keys.reduce({}) { |acc, key| acc[key] = (env_hash[key].is_a? String) ? env_hash[key].gsub(/[$]{1}/, "$$") : env_hash[key]; acc }
+      env_hash.keys.reduce do |acc, key|
+        if env_hash[key].is_a? String
+          acc[key] = (env_hash[key].is_a? String) ? env_hash[key].gsub(/[$]{1}/, "$$")
+        elsif env_hash[key].is_a? Numeric
+          acc[key] = env_hash[key]
+        else
+          raise KumoDockerCloud::StackFileError("Unable to handle environment key #{key} with value #{env_hash[key]} of class #{env_hash[key].class} which does not inherit from Numeric or String")
+        end
+        acc
+      end
     end
 
     private_class_method :make_all_root_level_keys_strings
