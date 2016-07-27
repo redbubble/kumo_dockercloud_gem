@@ -1,4 +1,5 @@
-# KumoDockerCloud [![Build status](https://badge.buildkite.com/e9ebd06f4732bbb2a914228ac8816a2bbbeaf8bf0444ea00b4.svg)](https://buildkite.com/redbubble/kumo-docker-cloud)
+# KumoDockerCloud 
+[![Build status](https://badge.buildkite.com/d22efc59148d48d86ca78e6129340070d1a459031a019fff48.svg)](https://buildkite.com/redbubble/kumo-dockercloud-gem) [![Code Climate](https://codeclimate.com/github/redbubble/kumo_dockercloud_gem/badges/gpa.svg)](https://codeclimate.com/github/redbubble/kumo_dockercloud_gem)
 
 This is the Redbubble wrapper around creating environments in docker cloud.  It is built into our rbdevltools container and can then be used during `apply-env` and `deploy` tasks.
 
