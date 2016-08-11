@@ -2,7 +2,7 @@ describe KumoDockerCloud::EnvironmentConfig do
   let(:env_name) { 'test' }
   let(:app_name) { "app-foo" }
   let(:config_path) { File.join(__dir__, '../fixtures/config') }
-  subject(:instance) { described_class.new(app_name: app_name, env_name: env_name, config_path: config_path) }
+  subject(:instance) { described_class.new(app_name: app_name, env_name: env_name, config_path: config_path, app_image: "redbubble/app-foo:master") }
 
   let(:docker_cloud_api) { instance_double('KumoDockerCloud::DockerCloudApi') }
   before { allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api }

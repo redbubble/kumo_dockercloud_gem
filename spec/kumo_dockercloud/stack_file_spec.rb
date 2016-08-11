@@ -1,7 +1,7 @@
 describe KumoDockerCloud::StackFile do
 
   let(:app_name) { 'application-stack-name' }
-  let(:config) { KumoDockerCloud::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path') }
+  let(:config) { KumoDockerCloud::EnvironmentConfig.new(app_name: app_name, env_name: 'test', config_path: 'a path', app_image: 'a-thing') }
   let(:env_vars) { {app_name => {'KEY' => 'VALUE'}} }
   let(:plain_text_secrets) do
     {

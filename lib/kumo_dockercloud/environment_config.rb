@@ -12,6 +12,7 @@ module KumoDockerCloud
       @config_path = options.fetch(:config_path)
       @log         = logger
       @app_name    = options.fetch(:app_name)
+      @app_image = options.fetch(:app_image)
     end
 
     def get_binding
@@ -43,13 +44,13 @@ module KumoDockerCloud
       if existing_image_name?
         existing_image_name
       else
-        "redbubble/#{app_name}:master"
+        @app_image
       end
     end
 
     def tagged_app_image(service_name)
       service = docker_cloud_api.service_by_stack_and_service_name(stack_name, service_name)
-      service ? service.image_name : "redbubble/#{app_name}:master"
+      service ? service.image_name : @app_image
     end
 
     def image_tag

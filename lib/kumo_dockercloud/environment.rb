@@ -22,7 +22,8 @@ module KumoDockerCloud
       @timeout = params.fetch(:timeout, 120)
       @confirmation_timeout = params.fetch(:confirmation_timeout, 30)
       @app_name = params.fetch(:app_name)
-      @config = EnvironmentConfig.new(app_name: @app_name, env_name: @env_name, config_path: params.fetch(:config_path))
+      @app_image = params.fetch(:app_image, "redbubble/#{@app_name}:master")
+      @config = EnvironmentConfig.new(app_name: @app_name, env_name: @env_name, config_path: params.fetch(:config_path), app_image: @app_image)
       @stack = Stack.new(@app_name, @env_name)
     end
 
