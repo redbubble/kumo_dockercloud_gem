@@ -200,4 +200,26 @@ describe KumoDockerCloud::Stack do
       expect(subject).to eq([redbubble_service])
     end
   end
+
+  describe '#exists' do
+    subject { stack.exists? }
+    let(:docker_cloud_api) { instance_double(KumoDockerCloud::DockerCloudApi, stack_by_name: docker_cloud_stack) }
+    before do
+      allow(KumoDockerCloud::DockerCloudApi).to receive(:new).and_return docker_cloud_api
+    end
+
+    context 'when the stack exists in docker cloud' do
+      let(:docker_cloud_stack) { double(:docker_cloud_stack) }
+      it 'is true when the stack exists in docker cloud' do
+        expect(subject).to eq(true)
+      end
+    end
+
+    context 'when the stack does not exist in docker cloud' do
+      let(:docker_cloud_stack) { nil }
+      it 'is false when the stack does not exist in docker cloud' do
+        expect(subject).to eq(false)
+      end
+    end
+  end
 end

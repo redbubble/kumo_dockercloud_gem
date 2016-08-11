@@ -19,6 +19,10 @@ module KumoDockerCloud
       checker.verify(service)
     end
 
+    def exists?
+      !docker_cloud_stack.nil?
+    end
+
     def deploy_blue_green(service_names, version, checker = ServiceChecker.new)
       haproxy_service = HaproxyService.new(@stack_name, docker_cloud_api)
 
@@ -69,6 +73,10 @@ module KumoDockerCloud
       end
 
       @docker_cloud_api ||= DockerCloudApi.new(dockercloud_api_options)
+    end
+
+    def docker_cloud_stack
+      @docker_cloud_stack ||= docker_cloud_api.stack_by_name(@stack_name)
     end
   end
 end
