@@ -19,27 +19,26 @@ describe KumoDockerCloud::Environment do
   let(:full_stack_name) { "#{app_name}-test" }
   let(:confirmation_timeout) { 0.5 }
   let(:stack_template_path) { File.join(__dir__, '../fixtures/stack.yml.erb') }
-
+  let(:exists_param) { true }
   let(:params) { {name: env_name, env_vars: env_vars, app_name: app_name, config_path: 'a path', stack_template_path: stack_template_path, confirmation_timeout: confirmation_timeout} }
+  let(:stack) { instance_double(KumoDockerCloud::Stack, :stack, exists?: exists_param, stack_name: full_stack_name) }
 
   subject(:env) { described_class.new(params) }
 
   before do
     allow(KumoDockerCloud::EnvironmentConfig).to receive(:new).and_return(config)
     allow(KumoDockerCloud::StackFile).to receive(:create_from_template).and_return(stack_file)
+    allow(KumoDockerCloud::Stack).to receive(:new).with(app_name, env_name).and_return(stack)
   end
 
   describe "#apply" do
     subject { env.apply }
-    let(:stack) { {"#{full_stack_name}" => 'stack stuff'} }
     let(:stack_checker) { instance_double(KumoDockerCloud::StackChecker, :stack_checker, verify: true) }
     before do
       allow(config).to receive(:image_tag).and_return('latest')
       allow(env).to receive(:evaluate_command).and_return app_name
       allow(env).to receive(:run_command)
       allow(KumoDockerCloud::StackChecker).to receive(:new).and_return(stack_checker)
-      allow(KumoDockerCloud::Stack).to receive(:new).with(app_name, env_name).and_return(stack)
-
     end
 
     it "writes a stack file" do
@@ -48,10 +47,13 @@ describe KumoDockerCloud::Environment do
       subject
     end
 
-    it 'runs the stack command' do
-      expect(env).to receive(:run_command).with(%r{^docker-cloud stack create -f .* -n #{full_stack_name}$})
+    context 'when the stack does not exist' do
+      let(:exists_param) { false }
+      it 'runs the stack command' do
+        expect(env).to receive(:run_command).with(%r{^docker-cloud stack create -f .* -n #{full_stack_name}$})
 
-      subject
+        subject
+      end
     end
 
     it 'runs the redeploy command' do
@@ -133,6 +135,5 @@ describe KumoDockerCloud::Environment do
       expect(KumoDockerCloud::ConsoleJockey).to receive(:get_confirmation).with(confirmation_timeout).and_return(false)
       subject
     end
-
   end
 end
