@@ -21,9 +21,9 @@ module KumoDockerCloud
       @stack_template_path = params.fetch(:stack_template_path)
       @timeout = params.fetch(:timeout, 120)
       @confirmation_timeout = params.fetch(:confirmation_timeout, 30)
-
       @app_name = params.fetch(:app_name)
       @config = EnvironmentConfig.new(app_name: @app_name, env_name: @env_name, config_path: params.fetch(:config_path))
+      @stack = Stack.new(@app_name, @env_name)
     end
 
     def apply(stack_checker = StackChecker.new)
@@ -37,10 +37,8 @@ module KumoDockerCloud
 
       run_command("docker-cloud stack redeploy #{stack_name}")
 
-      stack = Stack.new(@app_name, @env_name)
-
       begin
-        stack_checker.verify(stack)
+        stack_checker.verify(@stack)
       rescue StackCheckError
         raise EnvironmentApplyError.new("The stack is not in the expected state.")
       end
@@ -76,8 +74,7 @@ module KumoDockerCloud
     end
 
     def exists?
-      result = evaluate_command('docker-cloud stack ls')
-      result.include?(stack_name)
+      @stack.exists?
     end
 
     def write_stack_config_file(stack_file_data)
