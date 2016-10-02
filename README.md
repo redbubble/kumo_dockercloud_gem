@@ -100,18 +100,6 @@ this by passing in a service checker:
 ```
 As for the `StackChecker`, the third parameter is a timeout which defaults to 300 seconds.
 
-## Testing changes
-
-Changes to the gem can be manually tested end to end in a project that uses the gem (i.e. http-wala).
-
-- First start the dev-tools container: `baxter kumo tools debug non-production`
-- Re-install the gem: `gem specific_install https://github.com/redbubble/kumo_dockercloud_gem.git -b <your_branch>`
-- Fire up a console: `irb`
-- Require the gem: `require "kumo_dockercloud"`
-- Interact with the gem's classes. `KumoDockerCloud::Stack.new('http-wala', 'test').deploy('1518')`
-- If your container doesn't have a version check endpoint, add the `contactable: false` option: `KumoDockerCloud::Stack.new('http-wala', 'test', contactable: false).deploy('1518')`
-
-
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/kumo_dockercloud_gem/fork )
